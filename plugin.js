@@ -4,6 +4,34 @@ const crypto = require('crypto');
 const constantinople = require('constantinople');
 const stringify = require('js-stringify');
 
+const { typeOfAttribute } = require('./lib/contracts/contracts.js');
+
+// This relates values from security.html.contracts.AttrType to names
+// of functions exported by runtime.js
+const GUARDS_BY_ATTRIBUTE_TYPE = [
+  /* eslint-disable array-element-newline */
+  // Unused
+  null,
+  // Not Sensitive
+  null,
+  // HTML
+  'requireTrustedHtml',
+  // URL
+  'requireTrustedUrl',
+  // RESOURCE URL
+  'requireTrustedResourceUrl',
+  // TODO STYLE
+  null,
+  'requireTrustedScript',
+  // TODO ENUM
+  null,
+  // TODO CONSTANT
+  null,
+  // TODO IDENTIFIER
+  null,
+  /* eslint-enable array-element-newline */
+];
+
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
@@ -31,9 +59,49 @@ module.exports = Object.freeze({
     const policy = {
       __proto__: null,
       attrs(obj) {
+        // We may need to walk upwards to find the enclosing tag.
+        let elementName = null;
+        function getElementName() {
+          if (elementName === null) {
+            elementName = '*';
+            for (let i = path.length; (i -= 2) >= 0;) {
+              if (typeof path[i] === 'object' && path[i].type === 'Tag') {
+                elementName = path[i].name.toLowerCase();
+                break;
+              }
+            }
+          }
+          return elementName;
+        }
+        // Sometimes the type for one attribute depends on another.
+        // For example, the sensitivity of <link href> depends on
+        // the value of rel.
+        let values = null;
+        function getValue(name) {
+          name = String(name).toLowerCase();
+          if (!values) {
+            values = new Map();
+          }
+          for (const attr of obj) {
+            if (constantinople(attr.value)) {
+              const value = constantinople.toConstant(attr.value);
+              if (value) {
+                values.set(name, value);
+              }
+            }
+          }
+          return values.get(name);
+        }
+
+        // Iterate over attributes and add checks as necessary.
         for (const attr of obj) {
-          // TODO: use polymer-resin/lib/contracts.js
-          if (attr.name === 'href' && !constantinople(attr.val)) {
+          if (constantinople(attr.val)) {
+            continue;
+          }
+          const canonName = String(attr.name).toLowerCase();
+          const type = typeOfAttribute(getElementName(), canonName, getValue);
+          const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
+          if (guard) {
             let safeExpr = attr.val;
             let wellFormed = true;
             try {
@@ -47,7 +115,7 @@ module.exports = Object.freeze({
             }
             if (wellFormed) {
               needsRuntime = true;
-              safeExpr = `${ unpredictableId }.requireTrustedUrl(${ safeExpr })`;
+              safeExpr = `${ unpredictableId }.${ guard }(${ safeExpr })`;
             } else {
               safeExpr = stringify('about:invalid#malformed-input');
             }
