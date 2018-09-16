@@ -17,7 +17,7 @@ const { expect } = require('chai');
 const { describe, it } = require('mocha');
 
 const pug = require('pug');
-const thisPlugin = require('../index.js');
+const thisPlugin = require('../plugin.js');
 
 let caseCount = 0;
 

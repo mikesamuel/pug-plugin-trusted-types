@@ -2,7 +2,7 @@
   "name": "pug-plugin-trusted-types",
   "version": "1.0.0-alpha",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
-  "main": "index.js",
+  "main": "plugin.js",
   "scripts": {
     "cover": "istanbul cover _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",

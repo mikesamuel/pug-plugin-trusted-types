@@ -46,7 +46,7 @@ const myTemplate = pug.compile(
 
 ```js
 const pug = require('pug');
-const pugPluginTT = require('pug-plugin-trusted-types');
+const pugPluginTT = require('pug-plugin-trusted-types/plugin');
 
 const myTemplate = pug.compile(
     templateCode,
