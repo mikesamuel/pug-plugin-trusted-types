@@ -1,0 +1,79 @@
+{
+  "name": "pug-plugin-trusted-types",
+  "version": "1.0.0",
+  "description": "XSS prevention for Pug templates with typesafe exceptions",
+  "main": "index.js",
+  "scripts": {
+    "cover": "istanbul cover _mocha",
+    "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
+    "lint": "./node_modules/.bin/eslint .",
+    "prepack": "npm run lint && npm test",
+    "test": "mocha"
+  },
+  "pre-commit": [
+    "prepack"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikesamuel/pug-plugin-trusted-types.git"
+  },
+  "keywords": [
+    "xss",
+    "pug",
+    "template",
+    "trusted-types",
+    "security"
+  ],
+  "author": "@mikesamuel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mikesamuel/pug-plugin-trusted-types/issues"
+  },
+  "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types#readme",
+  "dependencies": {
+    "js-stringify": "^1.0.2",
+    "pug-walk": "^1.1.7",
+    "trusted-types": "^1.0.4"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.2",
+    "eslint": "^5.6.0",
+    "eslint-config-strict": "^14.0.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^5.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "pre-commit": "^1.2.2",
+    "pug": "^2.0.3"
+  },
+  "eslintIgnore": [
+    "/coverage/**"
+  ],
+  "eslintConfig": {
+    "extends": [
+      "strict"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "source",
+      "ecmaFeatures": {
+        "impliedStrict": false
+      }
+    },
+    "rules": {
+      "no-warning-comments": [
+        "error",
+        {
+          "terms": [
+            "do not submit"
+          ]
+        }
+      ],
+      "no-void": "off",
+      "strict": [
+        "error",
+        "global"
+      ]
+    }
+  }
+}

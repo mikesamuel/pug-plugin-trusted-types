@@ -1,0 +1,29 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Link"
+          }
+        ]
+      },
+      "attrs": [
+        {
+          "name": "href",
+          "val": "'http://example.com'",
+          "mustEscape": true
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": true
+    }
+  ],
+  "declaredBlocks": {}
+}
