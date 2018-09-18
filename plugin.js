@@ -1,8 +1,11 @@
 'use strict';
 
+/* eslint { "complexity": [ 2, { max: 15 } ] } */
+
 const crypto = require('crypto');
 const constantinople = require('constantinople');
-const stringify = require('js-stringify');
+const { parseExpression } = require('@babel/parser');
+const { default: generate } = require('@babel/generator');
 
 const { typeOfAttribute } = require('./lib/contracts/contracts.js');
 
@@ -15,11 +18,11 @@ const GUARDS_BY_ATTRIBUTE_TYPE = [
   // Not Sensitive
   null,
   // HTML
-  'requireTrustedHtml',
+  'requireTrustedHTML',
   // URL
-  'requireTrustedUrl',
+  'requireTrustedURL',
   // RESOURCE URL
-  'requireTrustedResourceUrl',
+  'requireTrustedResourceURL',
   // TODO STYLE
   null,
   'requireTrustedScript',
@@ -54,20 +57,21 @@ module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
     let ast = null;
-    let unpredictableId = null;
+    let unpredictableSuffix = null;
     {
       // Defensively copy.
       const astJson = JSON.stringify(inputAst);
       ast = JSON.parse(astJson);
       // Produce a stable but unguessable ID so we can get unmaskable access
       // to our runtime support code.
-      const unpredictableIdHash = crypto.createHash('sha256');
-      unpredictableIdHash.update(astJson);
-      unpredictableId = `tt_${ unpredictableIdHash.digest('hex') }`;
+      const unpredictableSuffixHash = crypto.createHash('sha256');
+      unpredictableSuffixHash.update(astJson);
+      unpredictableSuffix = unpredictableSuffixHash.digest('hex');
     }
 
     // If we make any changes, we'll inject runtime support.
     let needsRuntime = false;
+    let needsScrubbers = false;
 
     // Keep track of the mixin call graph and which are called in sensitive
     // contexts.
@@ -100,9 +104,37 @@ module.exports = Object.freeze({
       return null;
     }
 
-    // Decorate expression text with a call to a guard function.
-    function addGuard(guard, expr) {
-      let wellFormed = true;
+    // Sometimes the type for one attribute depends on another.
+    // For example, the sensitivity of <link href> depends on
+    // the value of rel.
+    function valueGetter({ attrs, attributeBlocks }) {
+      let values = null;
+      return function getValue(name) {
+        if (!values) {
+          values = new Map();
+          for (const attr of attrs) {
+            if (constantinople(attr.value)) {
+              const value = constantinople.toConstant(attr.value);
+              if (value) {
+                values.set(attr.name, value);
+              }
+            }
+          }
+          // eslint-disable-next-line no-unused-vars
+          for (const attributeBlock of attributeBlocks) {
+            // TODO: incorporate constant properties from attributeBlocks
+            // into values.
+            // TODO: see attributeBlock handler below for way to parse out
+            // name/value pairs.
+          }
+        }
+
+        name = String(name).toLowerCase();
+        return values.get(name);
+      };
+    }
+
+    function isWellFormed(expr) {
       try {
         // Should throw if attr.val is not well-formed.
         // eslint-disable-next-line no-new, no-new-func
@@ -110,15 +142,29 @@ module.exports = Object.freeze({
       } catch (exc) {
         // eslint-disable-next-line no-console
         console.error(`Malformed expression in Pug template: ${ expr }`);
-        wellFormed = false;
+        return false;
       }
+      return true;
+    }
+
+    // Decorate expression text with a call to a guard function.
+    function addGuard(guard, expr) {
       let safeExpr = null;
-      if (wellFormed) {
-        needsRuntime = true;
-        safeExpr = ` ${ unpredictableId }.${ guard }(${ expr }) `;
-      } else {
-        safeExpr = stringify('about:invalid#malformed-input');
+      if (!isWellFormed(expr)) {
+        expr = '{/*Malformed Expression*/}';
       }
+      needsRuntime = true;
+      safeExpr = ` tt_${ unpredictableSuffix }.${ guard }(${ expr }) `;
+      return safeExpr;
+    }
+
+    function addScrubber(scrubber, expr) {
+      let safeExpr = null;
+      if (!isWellFormed(expr)) {
+        expr = '{/*Malformed Expression*/}';
+      }
+      needsScrubbers = true;
+      safeExpr = ` ttrt_${ unpredictableSuffix }.${ scrubber }(${ expr }) `;
       return safeExpr;
     }
 
@@ -157,36 +203,52 @@ module.exports = Object.freeze({
         },
       },
       attrs(obj) {
-        // Sometimes the type for one attribute depends on another.
-        // For example, the sensitivity of <link href> depends on
-        // the value of rel.
-        let values = null;
-        function getValue(name) {
-          name = String(name).toLowerCase();
-          if (!values) {
-            values = new Map();
-          }
-          for (const attr of obj) {
-            if (constantinople(attr.value)) {
-              const value = constantinople.toConstant(attr.value);
-              if (value) {
-                values.set(name, value);
-              }
-            }
-          }
-          return values.get(name);
-        }
-
+        const getValue = valueGetter(path[path.length - 2]);
+        const elementName = getElementName();
         // Iterate over attributes and add checks as necessary.
         for (const attr of obj) {
           if (constantinople(attr.val)) {
             continue;
           }
           const canonName = String(attr.name).toLowerCase();
-          const type = typeOfAttribute(getElementName() || '*', canonName, getValue);
+          const type = typeOfAttribute(elementName || '*', canonName, getValue);
           const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
           if (guard) {
             attr.val = addGuard(guard, attr.val);
+          }
+        }
+      },
+      attributeBlocks(obj) {
+        const elementName = getElementName() || '*';
+        const getValue = valueGetter(path[path.length - 2]);
+        for (const attributeBlock of obj) {
+          const jsAst = parseExpression(attributeBlock.val);
+          let needsDynamicScrubbing = true;
+          let changedAst = false;
+          if (jsAst.type === 'ObjectExpression' && jsAst.properties) {
+            needsDynamicScrubbing = false;
+            for (const property of jsAst.properties) {
+              if (property.type !== 'ObjectProperty' || property.method || property.computed) {
+                // Can't sanitize getters or methods, or spread elements.
+                needsDynamicScrubbing = true;
+                break;
+              }
+              const attrName = String(property.key.name || property.key.value).toLowerCase();
+              const { code: valueExpression } = generate(property.value);
+              if (!constantinople(valueExpression)) {
+                const type = typeOfAttribute(elementName || '*', attrName, getValue);
+                const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
+                if (guard) {
+                  changedAst = true;
+                  property.value = parseExpression(addGuard(guard, valueExpression));
+                }
+              }
+            }
+          }
+          if (needsDynamicScrubbing) {
+            attributeBlock.val = addScrubber('scrubAttrs', attributeBlock.val);
+          } else if (changedAst) {
+            attributeBlock.val = generate(jsAst).code;
           }
         }
       },
@@ -243,13 +305,25 @@ module.exports = Object.freeze({
     // Inject the equivalent of
     // - var unpredictableId = ...
     // at the top of the template if it turns out we need it.
+    if (needsScrubbers) {
+      ast.nodes.splice(
+        0, 0,
+        {
+          'type': 'Code',
+          // TODO: What do we do about client side compilation?
+          'val': `var ttrt_${ unpredictableSuffix } = require('pug-runtime-trusted-type/scrubbers.js');`,
+          'buffer': false,
+          'mustEscape': false,
+          'isInline': false,
+        });
+    }
     if (needsRuntime) {
       ast.nodes.splice(
         0, 0,
         {
           'type': 'Code',
           // TODO: What do we do about client side compilation?
-          'val': `var ${ unpredictableId } = require('pug-plugin-trusted-type/runtime.js');`,
+          'val': `var tt_${ unpredictableSuffix } = require('pug-runtime-trusted-type/runtime.js');`,
           'buffer': false,
           'mustEscape': false,
           'isInline': false,

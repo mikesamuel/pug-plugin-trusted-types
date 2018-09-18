@@ -1,0 +1,152 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-runtime-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Code",
+      "val": "var ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-runtime-trusted-type/scrubbers.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": "{ href: 'const-href', title: 'const title' }"
+        }
+      ],
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": "({href: 'const-href', title: dynamic_title})"
+        }
+      ],
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": "{\n  href: tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: 'const title'\n}"
+        }
+      ],
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": "{\n  href: tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: dynamic_title\n}"
+        }
+      ],
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": " ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs({[dynamic_name]: dynamic_value}) "
+        }
+      ],
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "a",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "Text"
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [
+        {
+          "type": "AttributeBlock",
+          "val": " ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs(aww_cmon) "
+        }
+      ],
+      "isInline": true
+    }
+  ],
+  "declaredBlocks": {}
+}

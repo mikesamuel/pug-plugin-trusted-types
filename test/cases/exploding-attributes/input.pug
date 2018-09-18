@@ -1,0 +1,11 @@
+a&attributes({ href: 'const-href', title: 'const title' }) Text
+a&attributes(({href: 'const-href', title: dynamic_title})) Text
+a&attributes({ href: dynamic_href, title: 'const title' }) Text
+a&attributes({ href: dynamic_href, title: dynamic_title }) Text
+
+// TODO: does not parse
+// a&attributes({title: 'const title', ...rest}) Text
+
+a&attributes({[dynamic_name]: dynamic_value}) Text
+
+a&attributes(aww_cmon) Text

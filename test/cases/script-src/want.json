@@ -3,7 +3,7 @@
   "nodes": [
     {
       "type": "Code",
-      "val": "var tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079 = require('pug-plugin-trusted-type/runtime.js');",
+      "val": "var tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079 = require('pug-runtime-trusted-type/runtime.js');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
@@ -37,7 +37,7 @@
       "attrs": [
         {
           "name": "src",
-          "val": " tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079.requireTrustedResourceUrl(plugin) ",
+          "val": " tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079.requireTrustedResourceURL(plugin) ",
           "mustEscape": true
         },
         {
