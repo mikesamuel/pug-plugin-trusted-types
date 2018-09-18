@@ -1,0 +1,54 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079 = require('pug-plugin-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [
+        {
+          "name": "src",
+          "val": "'./main.js'",
+          "mustEscape": true
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [
+        {
+          "name": "src",
+          "val": " tt_5d08fcbd39d4c713f86bf15e13f5fba16f07b7fa787aa096b03ab3e00af04079.requireTrustedResourceUrl(plugin) ",
+          "mustEscape": true
+        },
+        {
+          "name": "type",
+          "val": "'javascript'",
+          "mustEscape": true
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}

@@ -1,0 +1,31 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_c0ab0518953cc87fb3672af000a607c6e63cd6d49aaca5714a43f7c188d1a54f = require('pug-plugin-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "iframe",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [
+        {
+          "name": "srcdoc",
+          "val": " tt_c0ab0518953cc87fb3672af000a607c6e63cd6d49aaca5714a43f7c188d1a54f.requireTrustedHtml(html) ",
+          "mustEscape": true
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}

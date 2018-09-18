@@ -1,0 +1,135 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26 = require('pug-plugin-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Mixin",
+      "name": "fp",
+      "args": "str",
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "alert("
+          },
+          {
+            "type": "Code",
+            "val": " tt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26.requireTrustedScript( str ) ",
+            "buffer": true,
+            "mustEscape": false,
+            "isInline": true
+          },
+          {
+            "type": "Text",
+            "val": ")"
+          }
+        ]
+      },
+      "call": false
+    },
+    {
+      "type": "Mixin",
+      "name": "f",
+      "args": "str",
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Mixin",
+            "name": "fp",
+            "args": "str",
+            "block": null,
+            "call": true,
+            "attrs": [],
+            "attributeBlocks": []
+          }
+        ]
+      },
+      "call": false
+    },
+    {
+      "type": "Mixin",
+      "name": "g",
+      "args": "str",
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "alert("
+          },
+          {
+            "type": "Code",
+            "val": " str ",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": true
+          },
+          {
+            "type": "Text",
+            "val": ")"
+          }
+        ]
+      },
+      "call": false
+    },
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Mixin",
+            "name": "f",
+            "args": "x",
+            "block": null,
+            "call": true,
+            "attrs": [],
+            "attributeBlocks": []
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "div",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Mixin",
+            "name": "g",
+            "args": "x",
+            "block": null,
+            "call": true,
+            "attrs": [],
+            "attributeBlocks": []
+          }
+        ]
+      },
+      "attrs": [
+        {
+          "name": "class",
+          "val": "'cl'",
+          "mustEscape": false
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}

@@ -1,0 +1,11 @@
+mixin fp(str)
+  | alert(#{ str })
+mixin f(str)
+  + fp(str)
+mixin g(str)
+  | alert(#{ str })
+
+script
+  +f(x)
+.cl
+  +g(x)
