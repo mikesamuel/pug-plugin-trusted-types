@@ -7,12 +7,12 @@ const constantinople = require('constantinople');
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 
-const { typeOfAttribute } = require('./lib/contracts/contracts.js');
+const { contentTypeForElement, typeOfAttribute } = require('./lib/contracts/contracts.js');
 
+/* eslint-disable array-element-newline */
 // This relates values from security.html.contracts.AttrType to names
 // of functions exported by runtime.js
 const GUARDS_BY_ATTRIBUTE_TYPE = [
-  /* eslint-disable array-element-newline */
   // Unused
   null,
   // Not Sensitive
@@ -32,20 +32,43 @@ const GUARDS_BY_ATTRIBUTE_TYPE = [
   null,
   // TODO IDENTIFIER
   null,
-  /* eslint-enable array-element-newline */
 ];
+
+const GUARDS_BY_ELEMENT_CONTENT_TYPE = [
+  null,
+  null,
+  // TODO STYLE
+  null,
+  'requireTrustedScript',
+  'reject',
+  'reject',
+  // RCDATA is OK
+  null,
+];
+/* eslint-enable array-element-newline */
+
+function multiMapSet(multimap, key, value) {
+  if (!multimap.has(key)) {
+    multimap.set(key, new Set());
+  }
+  const values = multimap.get(key);
+  if (!values.has(value)) {
+    values.add(value);
+    return true;
+  }
+  return false;
+}
 
 function transitiveClosure(nodeLabels, graph) {
   let madeProgress = false;
   do {
     madeProgress = false;
-    for (const src of Array.from(nodeLabels)) {
+    for (const [ src, values ] of Array.from(nodeLabels.entries())) {
       const targets = graph[src];
       if (targets) {
         for (const target of targets) {
-          if (!nodeLabels.has(target)) {
-            madeProgress = true;
-            nodeLabels.add(target);
+          for (const value of values) {
+            madeProgress = multiMapSet(nodeLabels, target, value) || madeProgress;
           }
         }
       }
@@ -76,7 +99,7 @@ module.exports = Object.freeze({
     // Keep track of the mixin call graph and which are called in sensitive
     // contexts.
     const deferredTextCode = [];
-    const calledInScript = new Set();
+    const calledInSensitiveContext = new Map();
     // Maps each name of a mixin to the names of mixins it calls in a text context.
     const mixinCallGraph = Object.create(null);
 
@@ -176,8 +199,10 @@ module.exports = Object.freeze({
         Code(obj) {
           if (!constantinople(obj.val)) {
             const elName = getElementName();
-            if (elName === 'script') {
-              obj.val = addGuard('requireTrustedScript', obj.val);
+            const contentType = contentTypeForElement(elName);
+            const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
+            if (guard) {
+              obj.val = addGuard(guard, obj.val);
               obj.mustEscape = false;
             } else if (elName === null) {
               const mixinName = getMixinName();
@@ -190,8 +215,10 @@ module.exports = Object.freeze({
         Mixin(obj) {
           if (obj.call) {
             const elName = getElementName();
-            if (elName === 'script') {
-              calledInScript.add(obj.name);
+            const contentType = contentTypeForElement(elName);
+            const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
+            if (guard) {
+              multiMapSet(calledInSensitiveContext, obj.name, guard);
             } else {
               const mixinName = getMixinName();
               if (mixinName) {
@@ -284,8 +311,8 @@ module.exports = Object.freeze({
     apply(ast, []);
 
     // If mixin f calls fp, and f is in calledInScript,
-    // then add fp to calledInScript.
-    transitiveClosure(calledInScript, mixinCallGraph);
+    // then add fp to calledInSensitiveContext.
+    transitiveClosure(calledInSensitiveContext, mixinCallGraph);
 
     // Worst case analysis!  If a code block appears in the
     // top level of a mixin body, and that body is called from the
@@ -293,9 +320,11 @@ module.exports = Object.freeze({
     // This may affect uses of the mixin from outside script elements.
     function guardTextInMixins() {
       for (const { mixinName, code } of deferredTextCode) {
-        if (calledInScript.has(mixinName)) {
-          code.val = addGuard('requireTrustedScript', code.val);
-          code.mustEscape = false;
+        if (calledInSensitiveContext.has(mixinName)) {
+          for (const guard of calledInSensitiveContext.get(mixinName)) {
+            code.val = addGuard(guard, code.val);
+            code.mustEscape = false;
+          }
         }
       }
     }
