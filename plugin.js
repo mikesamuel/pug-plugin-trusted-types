@@ -78,6 +78,11 @@ function transitiveClosure(nodeLabels, graph) {
   } while (madeProgress);
 }
 
+function mayContainTags(elName) {
+  elName = elName.toLowerCase();
+  return elName !== 'script' && elName !== 'style' && elName !== 'iframe';
+}
+
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
@@ -104,9 +109,9 @@ module.exports = Object.freeze({
     let needsRuntime = false;
     let needsScrubbers = false;
 
-    // Keep track of the mixin call graph and which are called in sensitive
+    // Keep track of the mixin call graph and which might be called in sensitive
     // contexts.
-    const deferredTextCode = [];
+    const deferred = [];
     const calledInSensitiveContext = new Map();
     // Maps each name of a mixin to the names of mixins it calls in a text context.
     const mixinCallGraph = Object.create(null);
@@ -119,16 +124,16 @@ module.exports = Object.freeze({
     // features.
     let mayTrustOutput = true;
 
-    function distrust(msg) {
-      const { filename, line } = policyPath[policyPath.length - 2] || {};
+    function distrust(msg, optAstNode) {
+      const { filename, line } = optAstNode || policyPath[policyPath.length - 2] || {};
       const relfilename = options.basedir ? path.relative(options.basedir, filename) : filename;
       report(`${ relfilename }:${ line }: ${ msg }`);
       mayTrustOutput = false;
     }
 
     // Walk upwards to find the enclosing tag.
-    function getElementName() {
-      for (let i = policyPath.length; (i -= 2) >= 0;) {
+    function getElementName(skip = 0) {
+      for (let i = policyPath.length - (skip * 2); (i -= 2) >= 0;) {
         if (typeof policyPath[i] === 'object' && policyPath[i].type === 'Tag') {
           return policyPath[i].name.toLowerCase();
         }
@@ -275,7 +280,7 @@ module.exports = Object.freeze({
             } else if (elName === null) {
               const mixinName = getMixinName();
               if (mixinName) {
-                deferredTextCode.push({ mixinName, code: obj });
+                deferred.push({ mixinName, code: obj });
               }
             }
           }
@@ -294,6 +299,19 @@ module.exports = Object.freeze({
                 mixinCallGraph[mixinName] = mixinCallGraph[mixinName] || [];
                 mixinCallGraph[mixinName].push(obj.name);
               }
+            }
+          }
+        },
+        Tag(obj) {
+          const elName = getElementName(1);
+          if (elName) {
+            if (!mayContainTags(elName)) {
+              distrust(`HTML tag <${ obj.name }> appears inside <${ elName }> which cannot have tag content`);
+            }
+          } else {
+            const mixinName = getMixinName();
+            if (mixinName) {
+              deferred.push({ mixinName, tag: obj });
             }
           }
         },
@@ -390,11 +408,22 @@ module.exports = Object.freeze({
     // top level of a <script> element, then guard the code.
     // This may affect uses of the mixin from outside script elements.
     function guardTextInMixins() {
-      for (const { mixinName, code } of deferredTextCode) {
+      for (const { mixinName, code, tag } of deferred) {
         if (calledInSensitiveContext.has(mixinName)) {
-          for (const guard of calledInSensitiveContext.get(mixinName)) {
-            code.val = addGuard(guard, code.val);
-            code.mustEscape = false;
+          const guards = calledInSensitiveContext.get(mixinName);
+          if (code) {
+            for (const guard of guards) {
+              code.val = addGuard(guard, code.val);
+              code.mustEscape = false;
+            }
+          } else if (tag) {
+            // TODO: magic string
+            if (guards.has('requireTrustedScript')) {
+              distrust(
+                `HTML tag <${ tag.name
+                }> may appear inside <script> which cannot have tag content via call to +${ mixinName }`,
+                tag);
+            }
           }
         }
       }
