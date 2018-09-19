@@ -146,6 +146,13 @@
         }
       ],
       "isInline": true
+    },
+    {
+      "type": "Code",
+      "val": "pug_html = pug_uncheckedConversionToTrustedHtml(pug_html)",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
     }
   ],
   "declaredBlocks": {}

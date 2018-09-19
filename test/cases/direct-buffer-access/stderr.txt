@@ -1,0 +1,1 @@
+Expression (pug_html += js) may interfere with PUG internals pug_html

@@ -191,13 +191,56 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
+    // Don't convert the output as TrustedHTML if the template uses known unsafe
+    // features.
+    let mayTrustOutput = true;
+    // If user expressions have free variables like pug_html then don't bless
+    // the output because we'd have to statically analyze the generated JS to
+    // preserve output integrity.
+    function checkExpressionDoesNotInterfere(expr) {
+      const seen = new Set();
+      function check(jsAst) {
+        if (jsAst && typeof jsAst === 'object' && jsAst.type === 'Identifier') {
+          if (/^pug_/.test(jsAst.name)) {
+            // eslint-disable-next-line no-console
+            console.warn(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
+            mayTrustOutput = false;
+          }
+        }
+        if (!seen.has(jsAst) && mayTrustOutput) {
+          seen.add(jsAst);
+          for (const key in jsAst) {
+            if (Object.hasOwnProperty.call(jsAst, key)) {
+              check(jsAst[key]);
+            }
+          }
+        }
+      }
+      if (mayTrustOutput) {
+        let jsAst = null;
+        try {
+          jsAst = parseExpression(expr);
+        } catch (exc) {
+          // eslint-disable-next-line no-console
+          console.warn(`Malformed expression (${ expr })`);
+          mayTrustOutput = false;
+          return;
+        }
+        check(jsAst);
+      }
+    }
+
     // Keys match keys in the AST.  The input is the referent of path.
     const policy = {
       __proto__: null,
       type: {
         __proto__: null,
         Code(obj) {
-          if (obj.buffer && !constantinople(obj.val)) {
+          if (constantinople(obj.val)) {
+            return;
+          }
+          checkExpressionDoesNotInterfere(obj.val);
+          if (obj.buffer) {
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
             const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
@@ -214,6 +257,7 @@ module.exports = Object.freeze({
         },
         Mixin(obj) {
           if (obj.call) {
+            checkExpressionDoesNotInterfere(obj.args);
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
             const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
@@ -237,6 +281,7 @@ module.exports = Object.freeze({
           if (constantinople(attr.val)) {
             continue;
           }
+          checkExpressionDoesNotInterfere(attr.val);
           const canonName = String(attr.name).toLowerCase();
           const type = typeOfAttribute(elementName || '*', canonName, getValue);
           const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
@@ -249,6 +294,7 @@ module.exports = Object.freeze({
         const elementName = getElementName() || '*';
         const getValue = valueGetter(path[path.length - 2]);
         for (const attributeBlock of obj) {
+          checkExpressionDoesNotInterfere(attributeBlock.val);
           const jsAst = parseExpression(attributeBlock.val);
           let needsDynamicScrubbing = true;
           let changedAst = false;
@@ -353,6 +399,17 @@ module.exports = Object.freeze({
           'type': 'Code',
           // TODO: What do we do about client side compilation?
           'val': `var tt_${ unpredictableSuffix } = require('pug-runtime-trusted-type/runtime.js');`,
+          'buffer': false,
+          'mustEscape': false,
+          'isInline': false,
+        });
+    }
+
+    if (mayTrustOutput) {
+      ast.nodes.push(
+        {
+          'type': 'Code',
+          'val': 'pug_html = pug_uncheckedConversionToTrustedHtml(pug_html)',
           'buffer': false,
           'mustEscape': false,
           'isInline': false,

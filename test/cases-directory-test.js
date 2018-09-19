@@ -16,13 +16,22 @@ const path = require('path');
 const { expect } = require('chai');
 const { describe, it } = require('mocha');
 
+const captureConsole = require('capture-console');
 const pug = require('pug');
 const thisPlugin = require('../plugin.js');
 
 let caseCount = 0;
+const unusedTestFiles = [];
 
-function compareFileTo(file, want, normalize) {
-  let got = fs.readFileSync(file);
+function compareFileTo(file, want, normalize, defaultText = null) {
+  let got = defaultText;
+  try {
+    got = fs.readFileSync(file, 'UTF-8');
+  } catch (exc) {
+    if (defaultText === null) {
+      throw exc;
+    }
+  }
   if (normalize) {
     got = normalize(got);
     want = normalize(want);
@@ -52,36 +61,105 @@ function normalizeAst(pugAstString) {
   return JSON.stringify(ast, null, 2);
 }
 
+function trimBlankLinesAtEnd(str) {
+  return str.replace(/[\r\n]*$/, '\n');
+}
+
 describe('case', () => {
   const casesDir = path.join(__dirname, 'cases');
-  for (const child of fs.readdirSync(casesDir)) {
-    const caseDir = path.join(casesDir, child);
+  for (const caseName of fs.readdirSync(casesDir)) {
+    const caseDir = path.join(casesDir, caseName);
     const inputFile = path.join(caseDir, 'input.pug');
     if (fs.existsSync(inputFile)) {
       ++caseCount;
-      it(child, () => {
-        let got = null;
-        const interceptAst = {
-          preCodeGen(ast) {
-            expect(got).to.equal(null, caseDir);
-            expect(typeof ast).to.equal('object', caseDir);
-            expect(ast).to.not.equal(null, caseDir);
-            got = ast;
-            return ast;
-          },
-        };
 
-        pug.compile(
-          fs.readFileSync(inputFile, 'utf-8'),
-          {
-            filename: path.join('cases', child, 'input.pug'),
-            plugins: [ thisPlugin, interceptAst ],
+      const endToEndTests = [];
+      const outputHtmlFiles = [];
+      for (const caseFile of fs.readdirSync(caseDir)) {
+        const testFilePath = path.join(caseDir, caseFile);
+        if (/\.pug$|^expected-ast[.]json$|^std(out|err)[.]txt$/.test(caseFile)) {
+          // handled separately
+        } else if (/\.json$/.test(caseFile)) {
+          endToEndTests.push(testFilePath);
+        } else if (/\.out\.html$/.test(caseFile)) {
+          outputHtmlFiles.push(testFilePath);
+        } else {
+          unusedTestFiles.push(testFilePath);
+        }
+      }
+      const expectedHtmlFiles = new Set(endToEndTests.map((x) => x.replace(/\.json$/, '.out.html')));
+      unusedTestFiles.push(...outputHtmlFiles.filter((x) => !expectedHtmlFiles.has(x)));
+
+      describe(caseName, () => {
+        let compiled = null;
+        const consoleOutput = { stderr: '', stdout: '' };
+        function getCompiled() {
+          if (!compiled) {
+            let astPreCodeGen = null;
+            const interceptAst = {
+              preCodeGen(ast) {
+                expect(astPreCodeGen).to.equal(null, caseDir);
+                expect(typeof ast).to.equal('object', caseDir);
+                expect(ast).to.not.equal(null, caseDir);
+                astPreCodeGen = ast;
+                return ast;
+              },
+            };
+
+            let fun = null;
+            consoleOutput.stderr = captureConsole.interceptStderr(() => {
+              consoleOutput.stdout = captureConsole.interceptStdout(() => {
+                fun = pug.compile(
+                  fs.readFileSync(inputFile, 'utf-8'),
+                  {
+                    filename: path.join('cases', caseName, 'input.pug'),
+                    plugins: [ thisPlugin, interceptAst ],
+                  });
+              });
+            });
+
+            compiled = { ast: astPreCodeGen, fun };
+          }
+          return compiled;
+        }
+
+        it('AST', () => {
+          const { ast } = getCompiled();
+
+          expect(ast).to.not.equal(null, caseDir);
+
+          const goldenJson = path.join(caseDir, 'expected-ast.json');
+          compareFileTo(goldenJson, JSON.stringify(ast), normalizeAst);
+        });
+
+        it('log', () => {
+          compareFileTo(
+            path.join(caseDir, 'stdout.txt'),
+            consoleOutput.stdout, trimBlankLinesAtEnd, '');
+          compareFileTo(
+            path.join(caseDir, 'stderr.txt'),
+            consoleOutput.stderr, trimBlankLinesAtEnd, '');
+        });
+
+        for (const endToEndTest of endToEndTests) {
+          it(endToEndTest.replace(/^.*[\\/]|\.json$/g, ''), () => {
+            const locals = JSON.parse(fs.readFileSync(endToEndTest, 'UTF-8'));
+            const { fun } = getCompiled();
+            let html = null;
+            try {
+              // TODO: figure out how to inject this reliably.
+              // eslint-disable-next-line camelcase
+              global.pug_uncheckedConversionToTrustedHtml =
+                (output) => `<!-- TrustedHTML -->\n${ output }\n<!-- /TrustedHTML -->`;
+              html = fun(locals);
+            } finally {
+              // eslint-disable-next-line camelcase
+              global.pug_uncheckedConversionToTrustedHtml = null;
+            }
+            const goldenHtml = endToEndTest.replace(/\.json$/, '.out.html');
+            compareFileTo(goldenHtml, html, trimBlankLinesAtEnd);
           });
-
-        expect(got).to.not.equal(null, caseDir);
-
-        const goldenJson = path.join(caseDir, 'expected-ast.json');
-        compareFileTo(goldenJson, JSON.stringify(got), normalizeAst);
+        }
       });
     }
   }
@@ -90,5 +168,8 @@ describe('case', () => {
 describe('cases', () => {
   it('has cases', () => {
     expect(caseCount > 0).to.equal(true, caseCount);
+  });
+  it('unused test files', () => {
+    expect(unusedTestFiles).to.deep.equal([]);
   });
 });
