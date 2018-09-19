@@ -3,8 +3,12 @@
   "version": "1.0.0-alpha",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
   "main": "plugin.js",
+  "files": [
+    "plugin.js",
+    "lib/**/*.js"
+  ],
   "scripts": {
-    "cover": "istanbul cover _mocha",
+    "cover": "istanbul cover -x lib/contracts/contracts.js _mocha",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "lint": "./node_modules/.bin/eslint .",
     "prepack": "./scripts/prepack.sh",
