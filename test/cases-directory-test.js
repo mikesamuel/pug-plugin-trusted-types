@@ -80,7 +80,7 @@ describe('case', () => {
 
         expect(got).to.not.equal(null, caseDir);
 
-        const goldenJson = path.join(caseDir, 'want.json');
+        const goldenJson = path.join(caseDir, 'expected-ast.json');
         compareFileTo(goldenJson, JSON.stringify(got), normalizeAst);
       });
     }
