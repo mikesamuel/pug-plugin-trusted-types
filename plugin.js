@@ -197,7 +197,7 @@ module.exports = Object.freeze({
       type: {
         __proto__: null,
         Code(obj) {
-          if (!constantinople(obj.val)) {
+          if (obj.buffer && !constantinople(obj.val)) {
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
             const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
