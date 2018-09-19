@@ -1,0 +1,5 @@
+a(href="/#url") Unsupported attribute interpolation
+a(href!=htmlEscapedUrl) Unescaped attribute
+button((click)=eventHandler) Ng attribute
+button('(click)'=eventHandler) Quoted ng attribute
+button(onclick=`${ fnName }(event)`) Dynamic event handler

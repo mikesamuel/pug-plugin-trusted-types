@@ -1,1 +1,1 @@
-Expression (pug_html += js) may interfere with PUG internals pug_html
+cases/direct-buffer-access/input.pug:2: Expression (pug_html += js) may interfere with PUG internals pug_html

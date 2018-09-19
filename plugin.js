@@ -29,7 +29,7 @@ const GUARDS_BY_ATTRIBUTE_TYPE = [
   // TODO ENUM
   null,
   // TODO CONSTANT
-  null,
+  'reject',
   // TODO IDENTIFIER
   null,
 ];
@@ -106,6 +106,17 @@ module.exports = Object.freeze({
     // A sequence of (object, key) pairs that were traversed to reach the
     // current value.
     const path = [];
+
+    // Don't convert the output as TrustedHTML if the template uses known unsafe
+    // features.
+    let mayTrustOutput = true;
+
+    function distrust(msg) {
+      const { filename, line } = path[path.length - 2] || {};
+      // eslint-disable-next-line no-console
+      console.warn(`${ filename }:${ line }: ${ msg }`);
+      mayTrustOutput = false;
+    }
 
     // Walk upwards to find the enclosing tag.
     function getElementName() {
@@ -191,9 +202,20 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
-    // Don't convert the output as TrustedHTML if the template uses known unsafe
-    // features.
-    let mayTrustOutput = true;
+    function maybeGuardAttributeValue(
+      elementName, attrName, getValue, valueExpression, onNewValue) {
+      attrName = String(attrName).toLowerCase();
+      const type = typeOfAttribute(elementName || '*', attrName, getValue);
+      if (type === null) {
+        distrust(`Cannot trust dynamic value for attribute ${ attrName }`);
+      } else {
+        const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
+        if (guard) {
+          onNewValue(addGuard(guard, valueExpression));
+        }
+      }
+    }
+
     // If user expressions have free variables like pug_html then don't bless
     // the output because we'd have to statically analyze the generated JS to
     // preserve output integrity.
@@ -201,10 +223,8 @@ module.exports = Object.freeze({
       const seen = new Set();
       function check(jsAst) {
         if (jsAst && typeof jsAst === 'object' && jsAst.type === 'Identifier') {
-          if (/^pug_/.test(jsAst.name)) {
-            // eslint-disable-next-line no-console
-            console.warn(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
-            mayTrustOutput = false;
+          if (/^pug_/.test(jsAst.name) || jsAst.name === 'eval') {
+            distrust(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
           }
         }
         if (!seen.has(jsAst) && mayTrustOutput) {
@@ -221,9 +241,7 @@ module.exports = Object.freeze({
         try {
           jsAst = parseExpression(expr);
         } catch (exc) {
-          // eslint-disable-next-line no-console
-          console.warn(`Malformed expression (${ expr })`);
-          mayTrustOutput = false;
+          distrust(`Malformed expression (${ expr })`);
           return;
         }
         check(jsAst);
@@ -282,12 +300,11 @@ module.exports = Object.freeze({
             continue;
           }
           checkExpressionDoesNotInterfere(attr.val);
-          const canonName = String(attr.name).toLowerCase();
-          const type = typeOfAttribute(elementName || '*', canonName, getValue);
-          const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
-          if (guard) {
-            attr.val = addGuard(guard, attr.val);
-          }
+          maybeGuardAttributeValue(
+            elementName, attr.name, getValue, attr.val,
+            (guardedExpression) => {
+              attr.val = guardedExpression;
+            });
         }
       },
       attributeBlocks(obj) {
@@ -306,15 +323,16 @@ module.exports = Object.freeze({
                 needsDynamicScrubbing = true;
                 break;
               }
-              const attrName = String(property.key.name || property.key.value).toLowerCase();
+              const attrName = property.key.name || property.key.value;
               const { code: valueExpression } = generate(property.value);
               if (!constantinople(valueExpression)) {
-                const type = typeOfAttribute(elementName || '*', attrName, getValue);
-                const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
-                if (guard) {
-                  changedAst = true;
-                  property.value = parseExpression(addGuard(guard, valueExpression));
-                }
+                maybeGuardAttributeValue(
+                  elementName, attrName, getValue, valueExpression,
+                  // eslint-disable-next-line no-loop-func
+                  (newValueExpression) => {
+                    changedAst = true;
+                    property.value = parseExpression(newValueExpression);
+                  });
               }
             }
           }

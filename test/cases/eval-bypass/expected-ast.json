@@ -1,0 +1,33 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "void js",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Code",
+            "val": "eval('pug_html += js')",
+            "buffer": false,
+            "mustEscape": false,
+            "isInline": false
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}

@@ -1,0 +1,1 @@
+cases/eval-bypass/input.pug:3: Expression (eval('pug_html += js')) may interfere with PUG internals eval
