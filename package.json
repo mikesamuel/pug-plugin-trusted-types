@@ -32,12 +32,10 @@
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types#readme",
   "dependencies": {
     "@babel/generator": "^7.0.0",
-    "@babel/parser": "^7.1.0",
-    "js-stringify": "^1.0.2",
-    "pug-walk": "^1.1.7",
-    "web-contract-types": "^1.0.2"
+    "@babel/parser": "^7.1.0"
   },
   "devDependencies": {
+    "capture-console": "^1.0.1",
     "chai": "^4.1.2",
     "coveralls": "^3.0.2",
     "eslint": "^5.6.0",
