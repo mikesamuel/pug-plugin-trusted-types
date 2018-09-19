@@ -3,6 +3,8 @@
 /* eslint { "complexity": [ 2, { max: 15 } ] } */
 
 const crypto = require('crypto');
+const path = require('path');
+
 const constantinople = require('constantinople');
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
@@ -111,33 +113,34 @@ module.exports = Object.freeze({
 
     // A sequence of (object, key) pairs that were traversed to reach the
     // current value.
-    const path = [];
+    const policyPath = [];
 
     // Don't convert the output as TrustedHTML if the template uses known unsafe
     // features.
     let mayTrustOutput = true;
 
     function distrust(msg) {
-      const { filename, line } = path[path.length - 2] || {};
-      report(`${ filename }:${ line }: ${ msg }`);
+      const { filename, line } = policyPath[policyPath.length - 2] || {};
+      const relfilename = options.basedir ? path.relative(options.basedir, filename) : filename;
+      report(`${ relfilename }:${ line }: ${ msg }`);
       mayTrustOutput = false;
     }
 
     // Walk upwards to find the enclosing tag.
     function getElementName() {
-      for (let i = path.length; (i -= 2) >= 0;) {
-        if (typeof path[i] === 'object' && path[i].type === 'Tag') {
-          return path[i].name.toLowerCase();
+      for (let i = policyPath.length; (i -= 2) >= 0;) {
+        if (typeof policyPath[i] === 'object' && policyPath[i].type === 'Tag') {
+          return policyPath[i].name.toLowerCase();
         }
       }
       return null;
     }
 
     function getMixinName() {
-      for (let i = path.length; (i -= 2) >= 0;) {
-        if (typeof path[i] === 'object' &&
-            path[i].type === 'Mixin' && !path[i].call) {
-          return path[i].name;
+      for (let i = policyPath.length; (i -= 2) >= 0;) {
+        if (typeof policyPath[i] === 'object' &&
+            policyPath[i].type === 'Mixin' && !policyPath[i].call) {
+          return policyPath[i].name;
         }
       }
       return null;
@@ -252,7 +255,7 @@ module.exports = Object.freeze({
       }
     }
 
-    // Keys match keys in the AST.  The input is the referent of path.
+    // Keys match keys in the AST.  The input is the referent of policyPath.
     const policy = {
       __proto__: null,
       type: {
@@ -296,7 +299,7 @@ module.exports = Object.freeze({
         },
       },
       attrs(obj) {
-        const getValue = valueGetter(path[path.length - 2]);
+        const getValue = valueGetter(policyPath[policyPath.length - 2]);
         const elementName = getElementName();
         // Iterate over attributes and add checks as necessary.
         for (const attr of obj) {
@@ -313,7 +316,7 @@ module.exports = Object.freeze({
       },
       attributeBlocks(obj) {
         const elementName = getElementName() || '*';
-        const getValue = valueGetter(path[path.length - 2]);
+        const getValue = valueGetter(policyPath[policyPath.length - 2]);
         for (const attributeBlock of obj) {
           checkExpressionDoesNotInterfere(attributeBlock.val);
           const jsAst = parseExpression(attributeBlock.val);
@@ -351,16 +354,16 @@ module.exports = Object.freeze({
 
     // Walk the AST applying the policy
     function apply(x) {
-      const pathLength = path.length;
-      path[pathLength] = x;
+      const policyPathLength = policyPath.length;
+      policyPath[policyPathLength] = x;
       if (Array.isArray(x)) {
         for (let i = 0, len = x.length; i < len; ++i) {
-          path[pathLength + 1] = i;
+          policyPath[policyPathLength + 1] = i;
           apply(x[i]);
         }
       } else if (x && typeof x === 'object') {
         for (const key of Object.getOwnPropertyNames(x)) {
-          path[pathLength + 1] = key;
+          policyPath[policyPathLength + 1] = key;
           const valueType = typeof policy[key];
           if (valueType === 'function') {
             policy[key](x[key]);
@@ -373,7 +376,7 @@ module.exports = Object.freeze({
           apply(x[key]);
         }
       }
-      path.length = pathLength;
+      policyPath.length = policyPathLength;
     }
 
     apply(ast, []);

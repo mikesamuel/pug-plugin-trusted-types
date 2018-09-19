@@ -57,7 +57,20 @@ function normalizeAst(pugAstString) {
     }
     return value;
   });
-  return JSON.stringify(ast, null, 2);
+
+  let json = JSON.stringify(ast, null, 2);
+  // We use unpredictable identifiers which are stable, but
+  // need not be overmatched in test goldens.
+  // Pull out the first such and globally replace it with
+  // a simpler string.
+  const hexes = /var tt(?:rt)?_([0-9a-f]{64}) =/.exec(json);
+  if (hexes) {
+    json = json.replace(
+      new RegExp(String.raw`\b(tt(?:rt)?_)${ hexes[1] }\b`, 'g'),
+      `$1${ 'x'.repeat(hexes[1].length) }`);
+  }
+
+  return json;
 }
 
 function trimBlankLinesAtEnd(str) {
@@ -108,8 +121,9 @@ describe('case', () => {
             const fun = pug.compile(
               fs.readFileSync(inputFile, 'utf-8'),
               {
-                filename: path.join('cases', caseName, 'input.pug'),
+                filename: inputFile,
                 plugins: [ thisPlugin, interceptAst ],
+                basedir: __dirname,
                 filterOptions: {
                   trustedTypes: {
                     report(msg) {
