@@ -16,7 +16,6 @@ const path = require('path');
 const { expect } = require('chai');
 const { describe, it } = require('mocha');
 
-const captureConsole = require('capture-console');
 const pug = require('pug');
 const thisPlugin = require('../plugin.js');
 
@@ -77,22 +76,22 @@ describe('case', () => {
       const outputHtmlFiles = [];
       for (const caseFile of fs.readdirSync(caseDir)) {
         const testFilePath = path.join(caseDir, caseFile);
-        if (/\.pug$|^expected-ast[.]json$|^std(out|err)[.]txt$/.test(caseFile)) {
+        if (/[.]pug$|^expected-ast[.]json$|^stderr[.]txt$/.test(caseFile)) {
           // handled separately
-        } else if (/\.json$/.test(caseFile)) {
+        } else if (/[.]json$/.test(caseFile)) {
           endToEndTests.push(testFilePath);
-        } else if (/\.out\.html$/.test(caseFile)) {
+        } else if (/[.]out[.]html$/.test(caseFile)) {
           outputHtmlFiles.push(testFilePath);
         } else {
           unusedTestFiles.push(testFilePath);
         }
       }
-      const expectedHtmlFiles = new Set(endToEndTests.map((x) => x.replace(/\.json$/, '.out.html')));
+      const expectedHtmlFiles = new Set(endToEndTests.map((x) => x.replace(/[.]json$/, '.out.html')));
       unusedTestFiles.push(...outputHtmlFiles.filter((x) => !expectedHtmlFiles.has(x)));
 
       describe(caseName, () => {
         let compiled = null;
-        const consoleOutput = { stderr: '', stdout: '' };
+        let consoleOutput = '';
         function getCompiled() {
           if (!compiled) {
             let astPreCodeGen = null;
@@ -106,17 +105,19 @@ describe('case', () => {
               },
             };
 
-            let fun = null;
-            consoleOutput.stderr = captureConsole.interceptStderr(() => {
-              consoleOutput.stdout = captureConsole.interceptStdout(() => {
-                fun = pug.compile(
-                  fs.readFileSync(inputFile, 'utf-8'),
-                  {
-                    filename: path.join('cases', caseName, 'input.pug'),
-                    plugins: [ thisPlugin, interceptAst ],
-                  });
+            const fun = pug.compile(
+              fs.readFileSync(inputFile, 'utf-8'),
+              {
+                filename: path.join('cases', caseName, 'input.pug'),
+                plugins: [ thisPlugin, interceptAst ],
+                filterOptions: {
+                  trustedTypes: {
+                    report(msg) {
+                      consoleOutput += `${ msg }\n`;
+                    },
+                  },
+                },
               });
-            });
 
             compiled = { ast: astPreCodeGen, fun };
           }
@@ -134,15 +135,12 @@ describe('case', () => {
 
         it('log', () => {
           compareFileTo(
-            path.join(caseDir, 'stdout.txt'),
-            consoleOutput.stdout, trimBlankLinesAtEnd, '');
-          compareFileTo(
             path.join(caseDir, 'stderr.txt'),
-            consoleOutput.stderr, trimBlankLinesAtEnd, '');
+            consoleOutput, trimBlankLinesAtEnd, '');
         });
 
         for (const endToEndTest of endToEndTests) {
-          it(endToEndTest.replace(/^.*[\\/]|\.json$/g, ''), () => {
+          it(endToEndTest.replace(/^.*[\\/]|[.]json$/g, ''), () => {
             const locals = JSON.parse(fs.readFileSync(endToEndTest, 'UTF-8'));
             const { fun } = getCompiled();
             let html = null;
@@ -156,7 +154,7 @@ describe('case', () => {
               // eslint-disable-next-line camelcase
               global.pug_uncheckedConversionToTrustedHtml = null;
             }
-            const goldenHtml = endToEndTest.replace(/\.json$/, '.out.html');
+            const goldenHtml = endToEndTest.replace(/[.]json$/, '.out.html');
             compareFileTo(goldenHtml, html, trimBlankLinesAtEnd);
           });
         }

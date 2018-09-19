@@ -79,6 +79,12 @@ function transitiveClosure(nodeLabels, graph) {
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
+    // PUG provides no way to forward options to plugins, so we piggyback on
+    // filterOptions.
+    const report = ((options.filterOptions || {}).trustedTypes || {}).report ||
+      // eslint-disable-next-line no-console
+      console.warn.bind(console);
+
     let ast = null;
     let unpredictableSuffix = null;
     {
@@ -113,8 +119,7 @@ module.exports = Object.freeze({
 
     function distrust(msg) {
       const { filename, line } = path[path.length - 2] || {};
-      // eslint-disable-next-line no-console
-      console.warn(`${ filename }:${ line }: ${ msg }`);
+      report(`${ filename }:${ line }: ${ msg }`);
       mayTrustOutput = false;
     }
 
@@ -174,8 +179,7 @@ module.exports = Object.freeze({
         // eslint-disable-next-line no-new, no-new-func
         new Function(`return () => (${ expr })`);
       } catch (exc) {
-        // eslint-disable-next-line no-console
-        console.error(`Malformed expression in Pug template: ${ expr }`);
+        report(`Malformed expression in Pug template: ${ expr }`);
         return false;
       }
       return true;
