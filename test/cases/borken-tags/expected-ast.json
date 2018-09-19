@@ -1,0 +1,41 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = require('pug-runtime-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Text",
+      "val": "<script ",
+      "isHtml": true
+    },
+    {
+      "type": "Tag",
+      "name": "img",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [
+        {
+          "name": "src",
+          "val": " tt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedURL(x) ",
+          "mustEscape": true
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": true
+    },
+    {
+      "type": "Text",
+      "val": "</script>",
+      "isHtml": true
+    }
+  ],
+  "declaredBlocks": {}
+}

@@ -1,0 +1,1 @@
+cases/borken-tags/input.pug:1: Malformed HTML tag <script 

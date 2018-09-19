@@ -83,6 +83,9 @@ function mayContainTags(elName) {
   return elName !== 'script' && elName !== 'style' && elName !== 'iframe';
 }
 
+// A tag without a '>' that corresponds to its '<'.
+const MALFORMED_TAG = /<\/?[a-zA-Z](?:[^>=]|=[\t\n\f\r ]*(?:"[^"]*"?|'[^']*'?)?)*$/;
+
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
@@ -317,6 +320,14 @@ module.exports = Object.freeze({
             const mixinName = getMixinName();
             if (mixinName) {
               deferred.push({ mixinName, tag: obj });
+            }
+          }
+        },
+        Text(obj) {
+          if (obj.isHtml) {
+            const match = MALFORMED_TAG.exec(obj.val);
+            if (match) {
+              distrust(`Malformed HTML tag ${ match[0] }`);
             }
           }
         },
