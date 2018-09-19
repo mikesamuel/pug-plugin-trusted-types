@@ -1,3 +1,4 @@
+cases/known-unsafe/input.pug:2: Attribute value must be escaped
 cases/known-unsafe/input.pug:3: Cannot trust dynamic value for attribute (click)
 cases/known-unsafe/input.pug:4: Cannot trust dynamic value for attribute (click)
 cases/known-unsafe/input.pug:5: Cannot trust dynamic value for attribute onclick

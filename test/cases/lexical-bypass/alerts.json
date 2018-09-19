@@ -1,0 +1,4 @@
+{
+  "srcAttr": "' src=data:text/javascript,alert(1) ",
+  "src": "http://evil.com/alert.js"
+}

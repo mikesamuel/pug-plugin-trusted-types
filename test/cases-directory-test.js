@@ -22,6 +22,24 @@ const thisPlugin = require('../plugin.js');
 let caseCount = 0;
 const unusedTestFiles = [];
 
+
+function requireStub(id) {
+  // TODO: implement this library and wire runtime into compiled bundle.
+  if (id !== 'pug-runtime-trusted-type/runtime.js') {
+    throw new Error(id);
+  }
+  return {
+    requireTrustedURL(str) {
+      str = `${ str }`;
+      if (/^(?:https?|mailto|tel):/.test(str)) {
+        return str;
+      }
+      return 'about:invalid#';
+    },
+  };
+}
+
+
 function compareFileTo(file, want, normalize, defaultText = null) {
   let got = defaultText;
   try {
@@ -45,10 +63,6 @@ function normalizeAst(pugAstString) {
       return value.filter((x) => x !== void 0);
     }
     if (value && typeof value === 'object') {
-      // Strip comments.
-      if (value.type === 'Comment') {
-        return void 0;
-      }
       // Strip debugging cruft.
       const obj = Object.assign(value);
       delete obj.line;
@@ -163,10 +177,12 @@ describe('case', () => {
               // eslint-disable-next-line camelcase
               global.pug_uncheckedConversionToTrustedHtml =
                 (output) => `<!-- TrustedHTML -->\n${ output }\n<!-- /TrustedHTML -->`;
+              global.require = requireStub;
               html = fun(locals);
             } finally {
               // eslint-disable-next-line camelcase
               global.pug_uncheckedConversionToTrustedHtml = null;
+              global.require = null;
             }
             const goldenHtml = endToEndTest.replace(/[.]json$/, '.out.html');
             compareFileTo(goldenHtml, html, trimBlankLinesAtEnd);

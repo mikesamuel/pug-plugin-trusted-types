@@ -1,0 +1,2 @@
+cases/cdata-corner-case/input.pug:3: HTML tag <div> appears inside <script> which cannot have tag content
+cases/cdata-corner-case/input.pug:9: HTML tag <div> may appear inside <script> which cannot have tag content via call to +f

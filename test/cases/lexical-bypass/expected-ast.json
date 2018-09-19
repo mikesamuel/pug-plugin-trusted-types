@@ -1,0 +1,78 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Code",
+      "val": "var tt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = require('pug-runtime-trusted-type/runtime.js');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "p",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Comment",
+            "val": " --><script id='",
+            "buffer": true
+          },
+          {
+            "type": "Code",
+            "val": "srcAttr",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": false
+          },
+          {
+            "type": "Comment",
+            "val": "",
+            "buffer": true
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    },
+    {
+      "type": "Code",
+      "val": "'\\n'",
+      "buffer": true,
+      "mustEscape": true,
+      "isInline": false
+    },
+    {
+      "type": "Tag",
+      "name": "img",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [
+        {
+          "name": "class",
+          "val": "'\"><script id=\"'",
+          "mustEscape": false
+        },
+        {
+          "name": "src",
+          "val": " tt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedURL(src) ",
+          "mustEscape": true
+        },
+        {
+          "name": "title",
+          "val": "'\"></script \"'",
+          "mustEscape": false
+        }
+      ],
+      "attributeBlocks": [],
+      "isInline": true
+    }
+  ],
+  "declaredBlocks": {}
+}

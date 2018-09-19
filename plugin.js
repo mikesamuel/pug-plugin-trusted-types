@@ -285,6 +285,11 @@ module.exports = Object.freeze({
             }
           }
         },
+        Comment(obj) {
+          if (/--|^-?$/.test(obj.val)) {
+            distrust(`Invalid comment content ${ JSON.stringify(obj.val) }`);
+          }
+        },
         Mixin(obj) {
           if (obj.call) {
             checkExpressionDoesNotInterfere(obj.args);
@@ -322,14 +327,23 @@ module.exports = Object.freeze({
         // Iterate over attributes and add checks as necessary.
         for (const attr of obj) {
           if (constantinople(attr.val)) {
-            continue;
+            if (!attr.mustEscape) {
+              const constant = constantinople.toConstant(attr.val);
+              if (/"/.test(constant)) {
+                distrust(`Attribute value ${ constant } breaks attribute quoting`);
+              }
+            }
+          } else {
+            checkExpressionDoesNotInterfere(attr.val);
+            maybeGuardAttributeValue(
+              elementName, attr.name, getValue, attr.val,
+              (guardedExpression) => {
+                attr.val = guardedExpression;
+              });
+            if (!attr.mustEscape) {
+              distrust('Attribute value must be escaped');
+            }
           }
-          checkExpressionDoesNotInterfere(attr.val);
-          maybeGuardAttributeValue(
-            elementName, attr.name, getValue, attr.val,
-            (guardedExpression) => {
-              attr.val = guardedExpression;
-            });
         }
       },
       attributeBlocks(obj) {

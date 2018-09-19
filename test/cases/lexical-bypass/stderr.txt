@@ -1,0 +1,4 @@
+cases/lexical-bypass/input.pug:2: Invalid comment content " --><script id='"
+cases/lexical-bypass/input.pug:4: Invalid comment content ""
+cases/lexical-bypass/input.pug:6: Attribute value "><script id=" breaks attribute quoting
+cases/lexical-bypass/input.pug:6: Attribute value "></script " breaks attribute quoting

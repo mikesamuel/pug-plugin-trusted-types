@@ -1,0 +1,132 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Code",
+            "val": "'/*'",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": false
+          },
+          {
+            "type": "Tag",
+            "name": "div",
+            "selfClosing": false,
+            "block": {
+              "type": "Block",
+              "nodes": [
+                {
+                  "type": "Code",
+                  "val": "'\\n'",
+                  "buffer": true,
+                  "mustEscape": true,
+                  "isInline": false
+                },
+                {
+                  "type": "Code",
+                  "val": "x",
+                  "buffer": true,
+                  "mustEscape": true,
+                  "isInline": false
+                }
+              ]
+            },
+            "attrs": [
+              {
+                "name": "title",
+                "val": "'*/ //'",
+                "mustEscape": true
+              }
+            ],
+            "attributeBlocks": [],
+            "isInline": false
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    },
+    {
+      "type": "Mixin",
+      "name": "f",
+      "args": "x",
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Code",
+            "val": "'/*'",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": false
+          },
+          {
+            "type": "Tag",
+            "name": "div",
+            "selfClosing": false,
+            "block": {
+              "type": "Block",
+              "nodes": [
+                {
+                  "type": "Code",
+                  "val": "'\\n'",
+                  "buffer": true,
+                  "mustEscape": true,
+                  "isInline": false
+                },
+                {
+                  "type": "Code",
+                  "val": "x",
+                  "buffer": true,
+                  "mustEscape": true,
+                  "isInline": false
+                }
+              ]
+            },
+            "attrs": [
+              {
+                "name": "title",
+                "val": "'*/ //'",
+                "mustEscape": true
+              }
+            ],
+            "attributeBlocks": [],
+            "isInline": false
+          }
+        ]
+      },
+      "call": false
+    },
+    {
+      "type": "Tag",
+      "name": "script",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Mixin",
+            "name": "f",
+            "args": "x",
+            "block": null,
+            "call": true,
+            "attrs": [],
+            "attributeBlocks": []
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}
