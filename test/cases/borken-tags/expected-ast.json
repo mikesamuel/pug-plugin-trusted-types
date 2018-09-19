@@ -35,6 +35,42 @@
       "type": "Text",
       "val": "</script>",
       "isHtml": true
+    },
+    {
+      "type": "Code",
+      "val": "'\\n'",
+      "buffer": true,
+      "mustEscape": true,
+      "isInline": true
+    },
+    {
+      "type": "Tag",
+      "name": "p",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": []
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    },
+    {
+      "type": "Text",
+      "val": "<?",
+      "isHtml": true
+    },
+    {
+      "type": "Code",
+      "val": "'\\n'",
+      "buffer": true,
+      "mustEscape": true,
+      "isInline": true
+    },
+    {
+      "type": "Text",
+      "val": "<!-- > <script>alert(1)</script> -->",
+      "isHtml": true
     }
   ],
   "declaredBlocks": {}

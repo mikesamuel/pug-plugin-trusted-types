@@ -83,8 +83,17 @@ function mayContainTags(elName) {
   return elName !== 'script' && elName !== 'style' && elName !== 'iframe';
 }
 
-// A tag without a '>' that corresponds to its '<'.
-const MALFORMED_TAG = /<\/?[a-zA-Z](?:[^>=]|=[\t\n\f\r ]*(?:"[^"]*"?|'[^']*'?)?)*$/;
+// The matched text is the malformed markup
+const MALFORMED_MARKUP = new RegExp(
+  // This requires a '>' after any '<' or '</' followed by a letter
+  // and does not count a '>' that is inside quotes following an '='.
+  String.raw`<\/?[a-zA-Z](?:[^>=]|=[\t\n\f\r ]*(?:"[^"]*"?|'[^']*'?)?)*$` +
+  // Comments should not embed -- that is not part of their end delimiter.
+  String.raw`|<!--[\s\S]--(?:[^>]|$)` +
+  // Short comments are lexical corner cases.
+  String.raw`<!---?(?:>|$)` +
+  // Unclosed pseudo comments.
+  String.raw`|<(?:[?]|!(?!--))[^>]*$`);
 
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
@@ -325,9 +334,9 @@ module.exports = Object.freeze({
         },
         Text(obj) {
           if (obj.isHtml) {
-            const match = MALFORMED_TAG.exec(obj.val);
+            const match = MALFORMED_MARKUP.exec(obj.val);
             if (match) {
-              distrust(`Malformed HTML tag ${ match[0] }`);
+              distrust(`Malformed HTML markup ${ match[0] }`);
             }
           }
         },

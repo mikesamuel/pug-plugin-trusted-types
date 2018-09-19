@@ -1,1 +1,2 @@
-cases/borken-tags/input.pug:1: Malformed HTML tag <script 
+cases/borken-tags/input.pug:1: Malformed HTML markup <script 
+cases/borken-tags/input.pug:9: Malformed HTML markup <?
