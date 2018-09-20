@@ -1,0 +1,35 @@
+{
+  "name": "pug-plugin-trusted-types",
+  "version": "1.0.0-alpha",
+  "description": "XSS prevention for Pug templates with typesafe exceptions",
+  "main": "plugin.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "lint": "(cd ../.. && npm run lint)",
+    "test": "(cd ../.. && npm test)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikesamuel/pug-plugin-trusted-types.git"
+  },
+  "keywords": [
+    "xss",
+    "pug",
+    "template",
+    "trusted-types",
+    "security"
+  ],
+  "author": "@mikesamuel",
+  "license": "(MIT OR Apache-2.0)",
+  "bugs": {
+    "url": "https://github.com/mikesamuel/pug-plugin-trusted-types/issues"
+  },
+  "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/plugin/README.md",
+  "dependencies": {
+    "@babel/generator": "^7.0.0",
+    "@babel/parser": "^7.1.0",
+    "pug-contracts-trusted-types": "^1.0.1-alpha"
+  }
+}

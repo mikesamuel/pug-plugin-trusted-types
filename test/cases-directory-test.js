@@ -17,7 +17,7 @@ const { expect } = require('chai');
 const { describe, it } = require('mocha');
 
 const pug = require('pug');
-const thisPlugin = require('../plugin.js');
+const ttPlugin = require('pug-plugin-trusted-types');
 
 let caseCount = 0;
 const unusedTestFiles = [];
@@ -136,7 +136,7 @@ describe('case', () => {
               fs.readFileSync(inputFile, 'utf-8'),
               {
                 filename: inputFile,
-                plugins: [ thisPlugin, interceptAst ],
+                plugins: [ ttPlugin, interceptAst ],
                 basedir: __dirname,
                 filterOptions: {
                   trustedTypes: {

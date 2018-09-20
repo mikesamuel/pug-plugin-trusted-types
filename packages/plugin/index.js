@@ -9,7 +9,7 @@ const constantinople = require('constantinople');
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 
-const { contentTypeForElement, typeOfAttribute } = require('./lib/contracts/contracts.js');
+const { contentTypeForElement, typeOfAttribute } = require('pug-contracts-trusted-types');
 
 /* eslint-disable array-element-newline */
 // This relates values from security.html.contracts.AttrType to names

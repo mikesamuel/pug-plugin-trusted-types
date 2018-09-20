@@ -3,7 +3,7 @@
 const { expect } = require('chai');
 const { describe, it } = require('mocha');
 
-const contracts = require('../lib/contracts/contracts.js');
+const contracts = require('pug-contracts-trusted-types');
 
 describe('contracts', () => {
   it('contentTypeForElement', () => {

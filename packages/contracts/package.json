@@ -1,0 +1,28 @@
+{
+  "name": "pug-contracts-trusted-types",
+  "version": "1.0.1-alpha",
+  "description": "Security-relevant metadata about HTML elements and attributes",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "lint": "(cd ../.. && npm run lint)",
+    "test": "(cd ../.. && npm test)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikesamuel/pug-plugin-trusted-types.git"
+  },
+  "keywords": [
+    "security",
+    "html",
+    "metadata"
+  ],
+  "author": "@mikesamuel",
+  "license": "(MIT OR Apache-2.0)",
+  "bugs": {
+    "url": "https://github.com/mikesamuel/pug-plugin-trusted-types/issues"
+  },
+  "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/contracts/README.md"
+}

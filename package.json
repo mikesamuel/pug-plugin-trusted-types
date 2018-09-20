@@ -1,17 +1,16 @@
 {
-  "name": "pug-plugin-trusted-types",
-  "version": "1.0.0-alpha",
+  "name": "pug-plugin-monorepo",
+  "version": "1.0.0",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
-  "main": "plugin.js",
-  "files": [
-    "plugin.js",
-    "lib/**/*.js"
-  ],
+  "main": "no-such-file.js",
+  "files": [],
   "scripts": {
-    "cover": "istanbul cover -x lib/contracts/contracts.js _mocha",
+    "cover": "./.istanbul.sh",
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "lint": "./node_modules/.bin/eslint .",
-    "prepack": "./scripts/prepack.sh",
+    "prepack": "npm test && npm run lint",
+    "prepublishOnly": "echo Do not publush monorepo. Use scripts/publish-packages.sh instead && false",
+    "pretest": "./scripts/pretest.sh",
     "test": "mocha"
   },
   "pre-commit": [
@@ -35,8 +34,8 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types#readme",
   "dependencies": {
-    "@babel/generator": "^7.0.0",
-    "@babel/parser": "^7.1.0"
+    "pug-contracts-trusted-types": "file:packages/contracts/pug-contracts-trusted-types-1.0.1-alpha.tgz",
+    "pug-plugin-trusted-types": "file:packages/plugin/pug-plugin-trusted-types-1.0.0-alpha.tgz"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -51,7 +50,7 @@
   },
   "eslintIgnore": [
     "/coverage/**",
-    "/lib/contracts/contracts.js"
+    "/packages/contracts/index.js"
   ],
   "eslintConfig": {
     "extends": [
