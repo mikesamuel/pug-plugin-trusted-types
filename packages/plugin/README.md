@@ -26,6 +26,9 @@ This plugin cannot, by itself, prevent XSS due to
 $ npm install pug-plugin-trusted-types
 ```
 
+If you precompile PUG templates to JS then you can install it as a dev
+dependency by adding `--save-dev`.
+
 ## Usage
 
 Add the plugin to the `plugins` field of your Pug options object.
