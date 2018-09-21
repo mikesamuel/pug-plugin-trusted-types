@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin-monorepo",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
   "main": "no-such-file.js",
   "files": [],
@@ -9,8 +9,9 @@
     "coveralls": "npm run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
     "lint": "./node_modules/.bin/eslint .",
     "prepack": "npm test && npm run lint",
-    "prepublishOnly": "echo Do not publush monorepo. Use scripts/publish-packages.sh instead && false",
+    "prepublishOnly": "echo Do not publush monorepo. Use scripts/publish-packages.js instead && false",
     "pretest": "./scripts/pretest.sh",
+    "preversion": "npm test && npm run lint",
     "test": "mocha"
   },
   "pre-commit": [
