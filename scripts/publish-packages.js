@@ -75,11 +75,16 @@ for (const dirname of fs.readdirSync(packagesDir)) {
   }
 }
 
+function metadataToFileContent(metadata) {
+  return `${ JSON.stringify(metadata, null, 2) }\n`;
+}
+
 // Update version and sync internal dependency versions.
 const changedFiles = [];
 for (const packageName in packages) {
   console.group(`Updating version of ${ packageName }`);
   const { metadata, metadataPath } = packages[packageName];
+  const before = metadataToFileContent(metadata);
   metadata.version = newVersion;
   if (metadata.dependencies) {
     for (const dep of Object.getOwnPropertyNames(metadata.dependencies)) {
@@ -89,25 +94,35 @@ for (const packageName in packages) {
       }
     }
   }
-  console.log('Writing updated metadata');
-  fs.writeFileSync(
-    metadataPath,
-    `${ JSON.stringify(metadata, null, 2) }\n`,
-    { encoding: 'UTF-8' });
+  const after = metadataToFileContent(metadata);
+  if (before !== after) {
+    console.log('Writing updated metadata');
+    fs.writeFileSync(
+      metadataPath,
+      after,
+      { encoding: 'UTF-8' });
+    changedFiles.push(metadataPath);
+  }
   console.groupEnd();
-  changedFiles.push(metadataPath);
 }
 
 // Update the monorepo metadata
 {
+  const before = metadataToFileContent(packageMetadata);
   for (const dep of Object.getOwnPropertyNames(packageMetadata.dependencies)) {
     if (dep in packages) {
       packageMetadata.dependencies[dep] = `^${ newVersion }`;
     }
   }
-  changedFiles.push(
-    path.join(__dirname, '..', 'package.json'),
-    path.join(__dirname, '..', 'package-lock.json'));
+  const after = metadataToFileContent(packageMetadata);
+  const metadataPath = path.join(__dirname, '..', 'package.json');
+  fs.writeFileSync(
+    metadataPath,
+    after,
+    { encoding: 'UTF-8' });
+  if (before !== after) {
+    changedFiles.push(metadataPath);
+  }
 }
 
 // Commit metadata changes
@@ -135,7 +150,7 @@ if (changedFiles.length) {
 {
   console.log('Calling out to `npm version`.');
   const { exc, status, signal } = childProcess.spawnSync(
-    'npm', [ 'verson', newVersion ],
+    'npm', [ 'version', newVersion ],
     {
       stdio: [ 'ignore', 'inherit', 'inherit' ],
       shell: false,
