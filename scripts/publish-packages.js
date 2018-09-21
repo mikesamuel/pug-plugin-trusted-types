@@ -111,12 +111,12 @@ for (const packageName in packages) {
 }
 
 // Commit metadata changes
-{
+if (changedFiles.length) {
   console.log('Committing metadata changes.');
   const { exc, status, signal } = childProcess.spawnSync(
     'git', [ 'commit', '-n', '-m', `Bumped version to ${ newVersion }`, ...changedFiles ],
     {
-      stdio: [ 'ignore', 'pipe', 'pipe' ],
+      stdio: [ 'ignore', 'inherit', 'inherit' ],
       shell: false,
     });
   if (exc || status || signal) {
@@ -137,7 +137,7 @@ for (const packageName in packages) {
   const { exc, status, signal } = childProcess.spawnSync(
     'npm', [ 'verson', newVersion ],
     {
-      stdio: [ 'ignore', 'pipe', 'pipe' ],
+      stdio: [ 'ignore', 'inherit', 'inherit' ],
       shell: false,
     });
   if (exc || status || signal) {
