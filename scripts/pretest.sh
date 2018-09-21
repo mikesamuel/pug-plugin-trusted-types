@@ -78,6 +78,8 @@ PACKAGES=( $PACKAGE_ORDER )
 echo
 echo
 echo INSTALLING SUBPACKAGES ${PACKAGES[@]} LOCALLY
+cp package.json{,.saved}
+cp package-lock.json{,.saved}
 # Build and install packages in dependency order
 for package in ${PACKAGES[@]}; do
     echo PACKING "$package"
@@ -98,7 +100,8 @@ for package in ${PACKAGES[@]}; do
         fi
     )
 done
-
+mv package.json{.saved,}
+mv package-lock.json{.saved,}
 
 echo
 echo
