@@ -212,7 +212,7 @@ module.exports = Object.freeze({
         expr = '{/*Malformed Expression*/}';
       }
       needsRuntime = true;
-      safeExpr = ` tt_${ unpredictableSuffix }.${ guard }(${ expr }) `;
+      safeExpr = ` rt_${ unpredictableSuffix }.${ guard }(${ expr }) `;
       return safeExpr;
     }
 
@@ -222,7 +222,7 @@ module.exports = Object.freeze({
         expr = '{/*Malformed Expression*/}';
       }
       needsScrubbers = true;
-      safeExpr = ` ttrt_${ unpredictableSuffix }.${ scrubber }(${ expr }) `;
+      safeExpr = ` sc_${ unpredictableSuffix }.${ scrubber }(${ expr }) `;
       return safeExpr;
     }
 
@@ -474,7 +474,7 @@ module.exports = Object.freeze({
         {
           'type': 'Code',
           // TODO: What do we do about client side compilation?
-          'val': `var ttrt_${ unpredictableSuffix } = require('pug-runtime-trusted-type/scrubbers.js');`,
+          'val': `var sc_${ unpredictableSuffix } = require('pug-scrubbers-trusted-types');`,
           'buffer': false,
           'mustEscape': false,
           'isInline': false,
@@ -486,7 +486,7 @@ module.exports = Object.freeze({
         {
           'type': 'Code',
           // TODO: What do we do about client side compilation?
-          'val': `var tt_${ unpredictableSuffix } = require('pug-runtime-trusted-type/runtime.js');`,
+          'val': `var rt_${ unpredictableSuffix } = require('pug-runtime-trusted-types');`,
           'buffer': false,
           'mustEscape': false,
           'isInline': false,

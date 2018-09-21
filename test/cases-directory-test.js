@@ -24,19 +24,17 @@ const unusedTestFiles = [];
 
 
 function requireStub(id) {
-  // TODO: implement this library and wire runtime into compiled bundle.
-  if (id !== 'pug-runtime-trusted-type/runtime.js') {
-    throw new Error(id);
+  // TODO: use a require extension handler to allow loading compiled code
+  // in a context with ambient, hookable require.
+  switch (id) {
+    case 'pug-runtime-trusted-types':
+    case 'pug-scrubbers-trusted-types':
+      // eslint-disable-next-line global-require
+      return require(id);
+    // TODO: scrubbers
+    default:
+      throw new Error(id);
   }
-  return {
-    requireTrustedURL(str) {
-      str = `${ str }`;
-      if (/^(?:https?|mailto|tel):/.test(str)) {
-        return str;
-      }
-      return 'about:invalid#';
-    },
-  };
 }
 
 
@@ -77,10 +75,10 @@ function normalizeAst(pugAstString) {
   // need not be overmatched in test goldens.
   // Pull out the first such and globally replace it with
   // a simpler string.
-  const hexes = /var tt(?:rt)?_([0-9a-f]{64}) =/.exec(json);
+  const hexes = /var (?:rt|sc)_([0-9a-f]{64}) =/.exec(json);
   if (hexes) {
     json = json.replace(
-      new RegExp(String.raw`\b(tt(?:rt)?_)${ hexes[1] }\b`, 'g'),
+      new RegExp(String.raw`\b(rt_|sc_)${ hexes[1] }\b`, 'g'),
       `$1${ 'x'.repeat(hexes[1].length) }`);
   }
 

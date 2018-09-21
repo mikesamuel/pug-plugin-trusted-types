@@ -3,14 +3,14 @@
   "nodes": [
     {
       "type": "Code",
-      "val": "var tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-runtime-trusted-type/runtime.js');",
+      "val": "var rt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-runtime-trusted-types');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
     },
     {
       "type": "Code",
-      "val": "var ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-runtime-trusted-type/scrubbers.js');",
+      "val": "var sc_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb = require('pug-scrubbers-trusted-types');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
@@ -76,7 +76,7 @@
       "attributeBlocks": [
         {
           "type": "AttributeBlock",
-          "val": "{\n  href: tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: 'const title'\n}"
+          "val": "{\n  href: rt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: 'const title'\n}"
         }
       ],
       "isInline": true
@@ -98,7 +98,7 @@
       "attributeBlocks": [
         {
           "type": "AttributeBlock",
-          "val": "{\n  href: tt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: dynamic_title\n}"
+          "val": "{\n  href: rt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.requireTrustedURL(dynamic_href),\n  title: dynamic_title\n}"
         }
       ],
       "isInline": true
@@ -120,7 +120,7 @@
       "attributeBlocks": [
         {
           "type": "AttributeBlock",
-          "val": " ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs({[dynamic_name]: dynamic_value}) "
+          "val": " sc_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs({[dynamic_name]: dynamic_value}) "
         }
       ],
       "isInline": true
@@ -142,7 +142,7 @@
       "attributeBlocks": [
         {
           "type": "AttributeBlock",
-          "val": " ttrt_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs(aww_cmon) "
+          "val": " sc_82dcf65af6c6ce326d3da888d699297b926aa433b13d7e97eb0c504cc821c4eb.scrubAttrs(aww_cmon) "
         }
       ],
       "isInline": true

@@ -9,18 +9,19 @@ echo "DEST_DIRNAME=$DEST_DIRNAME"
 # Fetch contracts
 echo TMP_DIRNAME="$(mktemp -d)"
 pushd "$TMP_DIRNAME"
-npm install --no-save polymer-resin
-cp node_modules/polymer-resin/LICENSE "$DEST_DIRNAME"/
-(cat node_modules/polymer-resin/lib/contracts/contracts.js | perl -pe \
- 'if (/^goog[.](provide|module)/) {
-    $_ = "const security = { html: { contracts: {} } };\n";
-  }' \
- && echo && echo '
+if npm install --no-save polymer-resin; then
+    cp node_modules/polymer-resin/LICENSE "$DEST_DIRNAME"/
+    (cat node_modules/polymer-resin/lib/contracts/contracts.js | perl -pe \
+     'if (/^goog[.](provide|module)/) {
+         $_ = "const security = { html: { contracts: {} } };\n";
+      }' \
+     && echo && echo '
 module.exports = {
   contentTypeForElement: security.html.contracts.contentTypeForElement,
   isEnumValueAllowed: security.html.contracts.isEnumValueAllowed,
   typeOfAttribute: security.html.contracts.typeOfAttribute,
 }') > "$DEST_DIRNAME"/index.js
+fi
 popd
 rm -rf "$TMP_DIRNAME"
 
@@ -79,15 +80,22 @@ echo
 echo INSTALLING SUBPACKAGES ${PACKAGES[@]} LOCALLY
 # Build and install packages in dependency order
 for package in ${PACKAGES[@]}; do
-    if [ -f "$package"/package.json ]; then
-        (
-            pushd "$package" && \
-            TARBALL="$(npm pack)" && \
-            popd && \
-            npm install "$package"/"$TARBALL" && \
-            rm "$package"/"$TARBALL"
-        )
-    fi
+    echo PACKING "$package"
+    (
+        pushd "$package";
+        TARBALL="$(npm pack)";
+        popd;
+        HASH="$(shasum -a 256 "$package/$TARBALL")"
+        HASHFILE="node_modules/.$(basename "$package").sha256"
+        if [ -f "$HASHFILE" ] && [ "$HASH" == "$(cat "$HASHFILE")" ]; then
+            true
+        else
+            echo INSTALLING "$package"
+            npm install "$package"/"$TARBALL";
+            echo -n "$HASH" > "$HASHFILE"
+        fi
+        rm "$package"/"$TARBALL"
+    )
 done
 
 

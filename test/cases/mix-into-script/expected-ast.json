@@ -3,7 +3,7 @@
   "nodes": [
     {
       "type": "Code",
-      "val": "var tt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26 = require('pug-runtime-trusted-type/runtime.js');",
+      "val": "var rt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26 = require('pug-runtime-trusted-types');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
@@ -21,7 +21,7 @@
           },
           {
             "type": "Code",
-            "val": " tt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26.requireTrustedScript( str ) ",
+            "val": " rt_02fe410893ea8721c726591bbb8ff38fd408c7069ab49b47259ab9a8a6ec0a26.requireTrustedScript( str ) ",
             "buffer": true,
             "mustEscape": false,
             "isInline": true

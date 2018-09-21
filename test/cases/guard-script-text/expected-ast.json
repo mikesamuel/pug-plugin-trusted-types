@@ -3,7 +3,7 @@
   "nodes": [
     {
       "type": "Code",
-      "val": "var tt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9 = require('pug-runtime-trusted-type/runtime.js');",
+      "val": "var rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9 = require('pug-runtime-trusted-types');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
@@ -21,7 +21,7 @@
           },
           {
             "type": "Code",
-            "val": " tt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
+            "val": " rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
             "buffer": true,
             "mustEscape": false,
             "isInline": true
@@ -40,7 +40,7 @@
           },
           {
             "type": "Code",
-            "val": " tt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
+            "val": " rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
             "buffer": true,
             "mustEscape": false,
             "isInline": true
@@ -69,7 +69,7 @@
           },
           {
             "type": "Code",
-            "val": " tt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
+            "val": " rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
             "buffer": true,
             "mustEscape": false,
             "isInline": true
@@ -93,7 +93,7 @@
         "nodes": [
           {
             "type": "Code",
-            "val": " tt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
+            "val": " rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9.requireTrustedScript(x) ",
             "buffer": true,
             "mustEscape": false,
             "isInline": true

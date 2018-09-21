@@ -30,6 +30,6 @@
   "dependencies": {
     "@babel/generator": "^7.0.0",
     "@babel/parser": "^7.1.0",
-    "pug-contracts-trusted-types": "^1.0.1-alpha"
+    "pug-contracts-trusted-types": "^1.0.0-alpha"
   }
 }
