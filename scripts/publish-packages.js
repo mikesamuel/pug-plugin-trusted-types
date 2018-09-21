@@ -170,7 +170,7 @@ if (changedFiles.length) {
 console.log(`
 Versions are synced to ${ newVersion }!
 
-To finish publishing, run:
+# To finish publishing, run:
 
 for dir in ${ Object.entries(packages).map(([ , { dirname } ]) => dirname).join(' ') }; do
   pushd "$dir"
@@ -178,7 +178,8 @@ for dir in ${ Object.entries(packages).map(([ , { dirname } ]) => dirname).join(
   popd
 done
 
+rm -rf node_modules package-lock && npm install
+git commit -n -m 'regen package-lock' package-lock.json
 git push origin master --tags
 
-npm install
 `);
