@@ -1,0 +1,6 @@
+{
+  "x": {
+    "content": "javascript:evil()",
+    "minter": "TrustedHTML"
+  }
+}

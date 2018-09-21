@@ -1,0 +1,6 @@
+{
+  "plugin": {
+    "content": "https://example.com/plugin.js",
+    "minter": "TrustedResourceURL"
+  }
+}
