@@ -37,7 +37,7 @@
     "pug-contracts-trusted-types": "^1.0.1-alpha",
     "pug-plugin-trusted-types": "^1.0.1-alpha",
     "pug-runtime-trusted-types": "^1.0.1-alpha",
-    "web-contract-types": "^1.0.3"
+    "web-contract-types": "^1.0.4"
   },
   "devDependencies": {
     "chai": "^4.1.2",

@@ -7,7 +7,7 @@
     "index.js"
   ],
   "dependencies": {
-    "web-contract-types": "^1.0.3"
+    "web-contract-types": "^1.0.4"
   },
   "scripts": {
     "lint": "(cd ../.. && npm run lint)",
