@@ -82,19 +82,20 @@ echo INSTALLING SUBPACKAGES ${PACKAGES[@]} LOCALLY
 for package in ${PACKAGES[@]}; do
     echo PACKING "$package"
     (
-        pushd "$package";
-        TARBALL="$(npm pack)";
-        popd;
-        HASH="$(shasum -a 256 "$package/$TARBALL")"
+        pushd "$package"
+        TARBALL="$package/$(npm pack)"
+        PACKAGE_NAME="$(node -e 'console.log(require(`./package.json`).name)')"
+        popd
+        HASH="$(shasum -a 256 "$TARBALL")"
         HASHFILE="node_modules/.$(basename "$package").sha256"
         if [ -f "$HASHFILE" ] && [ "$HASH" == "$(cat "$HASHFILE")" ]; then
             true
         else
-            echo INSTALLING "$package"
-            npm install "$package"/"$TARBALL";
+            echo INSTALLING "$package" to node_modules/"$PACKAGE_NAME"
+            npm uninstall "$PACKAGE_NAME"
+            npm install "$TARBALL"
             echo -n "$HASH" > "$HASHFILE"
         fi
-        rm "$package"/"$TARBALL"
     )
 done
 
@@ -124,3 +125,6 @@ echo COMPUTING COVERAGE CONFIG
     echo '  ./node_modules/.bin/_mocha'
 
 ) > .istanbul.sh
+
+echo
+echo DONE

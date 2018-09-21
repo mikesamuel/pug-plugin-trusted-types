@@ -98,6 +98,18 @@ for (const packageName in packages) {
   changedFiles.push(metadataPath);
 }
 
+// Update the monorepo metadata
+{
+  for (const dep of Object.getOwnPropertyNames(packageMetadata.dependencies)) {
+    if (dep in packages) {
+      packageMetadata.dependencies[dep] = `^${ newVersion }`;
+    }
+  }
+  changedFiles.push(
+    path.join(__dirname, '..', 'package.json'),
+    path.join(__dirname, '..', 'package-lock.json'));
+}
+
 // Commit metadata changes
 {
   console.log('Committing metadata changes.');
