@@ -34,9 +34,9 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types#readme",
   "dependencies": {
-    "pug-contracts-trusted-types": "file:packages/contracts/pug-contracts-trusted-types-1.0.1-alpha.tgz",
-    "pug-plugin-trusted-types": "file:packages/plugin/pug-plugin-trusted-types-1.0.1-alpha.tgz",
-    "pug-runtime-trusted-types": "file:packages/runtime/pug-runtime-trusted-types-1.0.1-alpha.tgz",
+    "pug-contracts-trusted-types": "^1.0.0-alpha",
+    "pug-plugin-trusted-types": "^1.0.0-alpha",
+    "pug-runtime-trusted-types": "^1.0.0-alpha",
     "web-contract-types": "^1.0.3"
   },
   "devDependencies": {
