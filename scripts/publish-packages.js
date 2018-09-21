@@ -99,7 +99,6 @@ for (const packageName in packages) {
 }
 
 // Commit metadata changes
-process.exit(0);  // eslint-disable-line
 {
   console.log('Committing metadata changes.');
   const { exc, status, signal } = childProcess.spawnSync(
