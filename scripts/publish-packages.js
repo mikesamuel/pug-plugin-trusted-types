@@ -60,7 +60,7 @@ console.log(`Using new version ${ newVersion }`);
 const packages = Object.create(null);
 
 // Fetch the set of subpackages and metadata
-const packagesDir = path.join('..', 'packages');
+const packagesDir = path.join(__dirname, '..', 'packages');
 for (const dirname of fs.readdirSync(packagesDir)) {
   const packageDir = path.join(packagesDir, dirname);
   const subpackageMetadataPath = path.join(packageDir, 'package.json');
@@ -92,7 +92,7 @@ for (const packageName in packages) {
   console.log('Writing updated metadata');
   fs.writeFileSync(
     metadataPath,
-    JSON.stringify(metadata, null, 2),
+    `${ JSON.stringify(metadata, null, 2) }\n`,
     { encoding: 'UTF-8' });
   console.groupEnd();
   changedFiles.push(metadataPath);
