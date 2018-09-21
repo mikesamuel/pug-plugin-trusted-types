@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 
-const packageMetadata = require('./package.json');
+const packageMetadata = require('../package.json');
 
 if (process.argv.length <= 1) {
   console.log(`Usage: ${ process.argv[0] } <new-version-spec>
@@ -22,7 +22,7 @@ if (process.argv.length <= 1) {
 `);
 }
 
-const [ , versionSpec, ...unused ] = process.argv;
+const [ , , versionSpec, ...unused ] = process.argv;
 
 if (unused.length) {
   throw new Error(`Unexpected arguments ${ JSON.stringify(unused) }`);
@@ -51,7 +51,7 @@ if (/^\d+\.\d+\.\d+(?:-\w+)?$/.test(versionSpec)) {
     case 'current':
       break;
     default:
-      console.error(`Unsupported version specifier: ${ versionSpec }`);
+      throw new Error(`Unsupported version specifier: ${ versionSpec }`);
   }
   newVersion = `${ newMajor }.${ newMinor }.${ newPatch }${ suffix || '' }`;
 }
@@ -60,10 +60,11 @@ console.log(`Using new version ${ newVersion }`);
 const packages = Object.create(null);
 
 // Fetch the set of subpackages and metadata
-for (const dirname of fs.readdirSync('packages')) {
-  const packageDir = path.join('.', 'packages', dirname);
+const packagesDir = path.join('..', 'packages');
+for (const dirname of fs.readdirSync(packagesDir)) {
+  const packageDir = path.join(packagesDir, dirname);
   const subpackageMetadataPath = path.join(packageDir, 'package.json');
-  if (fs.existsSync()) {
+  if (fs.existsSync(subpackageMetadataPath)) {
     // eslint-disable-next-line global-require
     const subpackageMetadata = require(subpackageMetadataPath);
     packages[subpackageMetadata.name] = {
