@@ -179,4 +179,6 @@ for dir in ${ Object.entries(packages).map(([ , { dirname } ]) => dirname).join(
 done
 
 git push origin master --tags
+
+npm install
 `);
