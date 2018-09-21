@@ -10,6 +10,8 @@
 
 'use strict';
 
+require('module-keys/cjs').polyfill(module, require, __filename);
+
 const fs = require('fs'); // eslint-disable-line id-length
 const path = require('path');
 
@@ -19,8 +21,18 @@ const { describe, it } = require('mocha');
 const pug = require('pug');
 const ttPlugin = require('pug-plugin-trusted-types');
 
-let caseCount = 0;
-const unusedTestFiles = [];
+const { Mintable } = require('node-sec-patterns');
+const {
+  TrustedHTML,
+  TrustedResourceURL,
+  TrustedScript,
+  TrustedURL,
+} = require('web-contract-types');
+
+const mintTrustedHTML = require.keys.unboxStrict(Mintable.minterFor(TrustedHTML));
+const mintTrustedResourceURL = require.keys.unboxStrict(Mintable.minterFor(TrustedResourceURL));
+const mintTrustedScript = require.keys.unboxStrict(Mintable.minterFor(TrustedScript));
+const mintTrustedURL = require.keys.unboxStrict(Mintable.minterFor(TrustedURL));
 
 
 function requireStub(id) {
@@ -85,9 +97,30 @@ function normalizeAst(pugAstString) {
   return json;
 }
 
+
 function trimBlankLinesAtEnd(str) {
   return str.replace(/[\r\n]*$/, '\n');
 }
+
+
+function reviveTrustedTypesForTest(key, val) {
+  // Do not use in production code.
+  if (val && typeof val === 'object' && !Array.isArray(val) &&
+      typeof val.content === 'string' && typeof val.minter === 'string') {
+    switch (val.minter) {
+      case 'TrustedHTML': return mintTrustedHTML(val.content);
+      case 'TrustedResourceURL': return mintTrustedResourceURL(val.content);
+      case 'TrustedScript': return mintTrustedScript(val.content);
+      case 'TrustedURL': return mintTrustedURL(val.content);
+      default: break;
+    }
+  }
+  return val;
+}
+
+
+let caseCount = 0;
+const unusedTestFiles = [];
 
 describe('case', () => {
   const casesDir = path.join(__dirname, 'cases');
@@ -167,7 +200,9 @@ describe('case', () => {
 
         for (const endToEndTest of endToEndTests) {
           it(endToEndTest.replace(/^.*[\\/]|[.]json$/g, ''), () => {
-            const locals = JSON.parse(fs.readFileSync(endToEndTest, 'UTF-8'));
+            const locals = JSON.parse(
+              fs.readFileSync(endToEndTest, 'UTF-8'),
+              reviveTrustedTypesForTest);
             const { fun } = getCompiled();
             let html = null;
             try {
