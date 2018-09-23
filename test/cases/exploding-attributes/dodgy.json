@@ -1,0 +1,10 @@
+{
+  "dynamic_title": "dynamic_title",
+  "dynamic_href": "javascript:evil()",
+  "dynamic_name": "href",
+  "dynamic_value": "javascript:evil()",
+  "aww_cmon": {
+    "title": "dynamic_title",
+    "href": "javascript:evil()"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "dynamic_title": "dynamic_title",
+  "dynamic_href": {
+    "content": "javascript:ok()",
+    "minter": "TrustedURL"
+  },
+  "dynamic_name": "href",
+  "dynamic_value": {
+    "content": "javascript:ok()",
+    "minter": "TrustedURL"
+  },
+  "aww_cmon": {
+    "title": "dynamic_title",
+    "href": {
+      "content": "javascript:ok()",
+      "minter": "TrustedURL"
+    }
+  }
+}

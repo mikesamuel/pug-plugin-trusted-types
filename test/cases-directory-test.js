@@ -40,7 +40,7 @@ function requireStub(id) {
   // in a context with ambient, hookable require.
   switch (id) {
     case 'pug-runtime-trusted-types':
-    case 'pug-scrubbers-trusted-types':
+    case 'pug-scrubber-trusted-types':
       // eslint-disable-next-line global-require
       return require(id);
     // TODO: scrubbers
@@ -100,6 +100,13 @@ function normalizeAst(pugAstString) {
 
 function trimBlankLinesAtEnd(str) {
   return str.replace(/[\r\n]*$/, '\n');
+}
+
+
+function stripLineContinuations(str) {
+  return str.replace(
+      /(\\+)\n/g,
+    (whole, slashes) => (slashes.length & 1 ? slashes.substring(1) : whole));
 }
 
 
@@ -218,7 +225,9 @@ describe('case', () => {
               global.require = null;
             }
             const goldenHtml = endToEndTest.replace(/[.]json$/, '.out.html');
-            compareFileTo(goldenHtml, html, trimBlankLinesAtEnd);
+            compareFileTo(
+              goldenHtml, html,
+              (txt) => trimBlankLinesAtEnd(stripLineContinuations(txt)));
           });
         }
       });
