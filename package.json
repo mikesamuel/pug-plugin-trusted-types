@@ -10,7 +10,7 @@
     "lint": "./node_modules/.bin/eslint .",
     "prepack": "npm test && npm run lint",
     "prepublishOnly": "echo Do not publush monorepo. Use scripts/publish-packages.js instead && false",
-    "pretest": "./scripts/pretest.sh",
+    "pretest": "./scripts/pretest.js",
     "test": "mocha"
   },
   "pre-commit": [
@@ -34,6 +34,8 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types#readme",
   "dependencies": {
+    "@babel/generator": "^7.0.0",
+    "@babel/parser": "^7.1.0",
     "pug-contracts-trusted-types": "^1.0.1-alpha",
     "pug-plugin-trusted-types": "^1.0.1-alpha",
     "pug-runtime-trusted-types": "^1.0.1-alpha",

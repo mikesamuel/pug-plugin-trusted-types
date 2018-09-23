@@ -1,3 +1,4 @@
+#!/bin/bash
 ./node_modules/.bin/istanbul cover \
   -no-default-excludes \
   -i 'node_modules/pug-plugin-trusted-types/**/*.js' \
