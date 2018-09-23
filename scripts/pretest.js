@@ -172,7 +172,7 @@ function sortEntries(obj) {
   return sorted;
 }
 
-function updatePackageMetadata(packages) {
+function updatePackageMetadata(packages, includeInternal) {
   // Updates <root>/package.json so that its dependencies are the union of the
   // dependencies of subpackages.
   const externalDependencies = Object.create(null);
@@ -202,16 +202,18 @@ function updatePackageMetadata(packages) {
   // eslint-disable-next-line global-require
   const monorepometadata = require('../package.json');
 
-  function updatePackageMetadataWithDependencies(dependencies) {
+  function updatePackageMetadataDependencies(dependencies) {
     const newDependencies = sortEntries(dependencies);
     monorepometadata.dependencies = newDependencies;
     wf(path.join(root, 'package.json'), `${ JSON.stringify(monorepometadata, null, 2) }\n`);
   }
 
-  updatePackageMetadataWithDependencies(externalDependencies);
+  updatePackageMetadataDependencies(externalDependencies);
   x({ cwd: root }, 'npm', 'install');
-  updatePackageMetadataWithDependencies(
-    Object.assign(externalDependencies, internalDependencies));
+  if (includeInternal) {
+    updatePackageMetadataDependencies(
+      Object.assign(externalDependencies, internalDependencies));
+  }
 }
 
 function installLocally(packages) {
@@ -258,22 +260,23 @@ function computeCoverageConfig(packages) {
   wf(path.join(root, '.istanbul.sh'), istanbulConfig);
 }
 
+if (require.main === module) {
+  fetchContracts();
 
-fetchContracts();
+  console.log('');
+  console.log('COMPUTING PACKAGE ORDER');
+  const packages = computePackageOrder();
 
-console.log('');
-console.log('COMPUTING PACKAGE ORDER');
-const packages = computePackageOrder();
+  updatePackageMetadata(packages, false);
 
-updatePackageMetadata(packages);
+  console.log('');
+  console.log(`INSTALLING SUBPACKAGES ${ packages.map(({ name }) => name) } LOCALLY`);
+  installLocally(packages);
 
-console.log('');
-console.log(`INSTALLING SUBPACKAGES ${ packages.map(({ name }) => name) } LOCALLY`);
-installLocally(packages);
+  console.log('');
+  console.log('COMPUTING COVERAGE CONFIG');
+  computeCoverageConfig(packages);
 
-console.log('');
-console.log('COMPUTING COVERAGE CONFIG');
-computeCoverageConfig(packages);
-
-console.log('');
-console.log('DONE');
+  console.log('');
+  console.log('DONE');
+}
