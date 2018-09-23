@@ -1,0 +1,6 @@
+{
+  "html": {
+    "content": "Hello, <b>World</b>!",
+    "minter": "TrustedHTML"
+  }
+}

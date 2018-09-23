@@ -67,9 +67,9 @@
           },
           {
             "type": "Code",
-            "val": " str ",
+            "val": " rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedHTML( str ) ",
             "buffer": true,
-            "mustEscape": true,
+            "mustEscape": false,
             "isInline": true
           },
           {

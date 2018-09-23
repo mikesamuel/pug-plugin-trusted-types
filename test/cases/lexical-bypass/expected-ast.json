@@ -22,9 +22,9 @@
           },
           {
             "type": "Code",
-            "val": "srcAttr",
+            "val": " rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedHTML(srcAttr) ",
             "buffer": true,
-            "mustEscape": true,
+            "mustEscape": false,
             "isInline": false
           },
           {

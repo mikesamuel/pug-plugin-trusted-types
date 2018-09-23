@@ -11,6 +11,10 @@ const { default: generate } = require('@babel/generator');
 
 const { contentTypeForElement, typeOfAttribute } = require('pug-contracts-trusted-types');
 
+// Names of functions exported by the runtime package.
+const trustedHTMLGuard = 'requireTrustedHTML';
+const trustedScriptGuard = 'requireTrustedScript';
+
 /* eslint-disable array-element-newline */
 // This relates values from security.html.contracts.AttrType to names
 // of functions exported by runtime.js
@@ -20,14 +24,14 @@ const GUARDS_BY_ATTRIBUTE_TYPE = [
   // Not Sensitive
   null,
   // HTML
-  'requireTrustedHTML',
+  trustedHTMLGuard,
   // URL
   'requireTrustedURL',
   // RESOURCE URL
   'requireTrustedResourceURL',
   // TODO STYLE
   null,
-  'requireTrustedScript',
+  trustedScriptGuard,
   // TODO ENUM
   null,
   // TODO CONSTANT
@@ -41,7 +45,7 @@ const GUARDS_BY_ELEMENT_CONTENT_TYPE = [
   null,
   // TODO STYLE
   null,
-  'requireTrustedScript',
+  trustedScriptGuard,
   'reject',
   'reject',
   // RCDATA is OK
@@ -285,15 +289,20 @@ module.exports = Object.freeze({
           if (obj.buffer) {
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
-            const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
+            let guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
+            if (!guard) {
+              if (elName === null) {
+                const mixinName = getMixinName();
+                if (mixinName) {
+                  deferred.push({ mixinName, code: obj });
+                  return;
+                }
+              }
+              guard = trustedHTMLGuard;
+            }
             if (guard) {
               obj.val = addGuard(guard, obj.val);
               obj.mustEscape = false;
-            } else if (elName === null) {
-              const mixinName = getMixinName();
-              if (mixinName) {
-                deferred.push({ mixinName, code: obj });
-              }
             }
           }
         },
@@ -452,13 +461,16 @@ module.exports = Object.freeze({
             }
           } else if (tag) {
             // TODO: magic string
-            if (guards.has('requireTrustedScript')) {
+            if (guards.has(trustedScriptGuard)) {
               distrust(
                 `HTML tag <${ tag.name
                 }> may appear inside <script> which cannot have tag content via call to +${ mixinName }`,
                 tag);
             }
           }
+        } else if (code) {
+          code.val = addGuard(trustedHTMLGuard, code.val);
+          code.mustEscape = false;
         }
       }
     }

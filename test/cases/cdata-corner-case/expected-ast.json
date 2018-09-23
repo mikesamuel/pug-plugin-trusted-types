@@ -2,6 +2,13 @@
   "type": "Block",
   "nodes": [
     {
+      "type": "Code",
+      "val": "var rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = require('pug-runtime-trusted-types');",
+      "buffer": false,
+      "mustEscape": false,
+      "isInline": false
+    },
+    {
       "type": "Tag",
       "name": "script",
       "selfClosing": false,
@@ -31,9 +38,9 @@
                 },
                 {
                   "type": "Code",
-                  "val": "x",
+                  "val": " rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedHTML(x) ",
                   "buffer": true,
-                  "mustEscape": true,
+                  "mustEscape": false,
                   "isInline": false
                 }
               ]
@@ -84,9 +91,9 @@
                 },
                 {
                   "type": "Code",
-                  "val": "x",
+                  "val": " rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.requireTrustedHTML(x) ",
                   "buffer": true,
-                  "mustEscape": true,
+                  "mustEscape": false,
                   "isInline": false
                 }
               ]
