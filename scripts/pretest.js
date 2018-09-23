@@ -225,15 +225,10 @@ function installLocally(packages) {
     console.log(`PACKING ${ name }`);
 
     const tarball = path.join(dir, qx({ cwd: dir }, 'npm', 'pack'));
-    const hash = qx('shasum', '-a', '256', tarball);
-    const hashFile = path.join(root, 'node_modules', `.${ name }.sha256`);
-    if (!e(hashFile) || rf(hashFile) !== hash) {
-      console.log(`INSTALLING ${ name } from ${ tarball }`);
-      rmrf(root, 'node_modules', name);
-      x({ cwd: root }, 'mkdir', path.join('node_modules', name));
-      x({ cwd: path.join(root, 'node_modules', name) }, 'tar', 'xzf', path.join(tarball), '--strip-components=1');
-      wf(hashFile, hash);
-    }
+    console.log(`INSTALLING ${ name } from ${ tarball }`);
+    rmrf(root, 'node_modules', name);
+    x({ cwd: root }, 'mkdir', path.join('node_modules', name));
+    x({ cwd: path.join(root, 'node_modules', name) }, 'tar', 'xzf', tarball, '--strip-components=1');
   }
 
   // Restore package metadata
