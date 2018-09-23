@@ -38,8 +38,10 @@
     "@babel/parser": "^7.1.0",
     "js-stringify": "^1.0.2",
     "pug-contracts-trusted-types": "^1.0.1-alpha",
+    "pug-guards-trusted-types": "^1.0.1-alpha",
     "pug-plugin-trusted-types": "^1.0.1-alpha",
     "pug-runtime-trusted-types": "^1.0.1-alpha",
+    "pug-scrubber-trusted-types": "^1.0.1-alpha",
     "web-contract-types": "^1.0.4"
   },
   "devDependencies": {

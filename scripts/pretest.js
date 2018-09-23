@@ -175,13 +175,17 @@ function sortEntries(obj) {
 function updatePackageMetadata(packages) {
   // Updates <root>/package.json so that its dependencies are the union of the
   // dependencies of subpackages.
-  const dependencies = Object.create(null);
+  const externalDependencies = Object.create(null);
+  const internalDependencies = Object.create(null);
+  const internalPackageNames = new Set(packages.map(({ name }) => name));
   for (const { metadata } of packages) {
-    dependencies[metadata.name] = `^${ metadata.version }`;
+    internalDependencies[metadata.name] = `^${ metadata.version }`;
   }
   for (const { metadata } of packages) {
     if (metadata.dependencies) {
       for (const [ dep, version ] of Object.entries(metadata.dependencies)) {
+        const dependencies = internalPackageNames.has(dep) ?
+          internalDependencies : externalDependencies;
         if (dep in dependencies) {
           if (version !== dependencies[dep]) {
             throw new Error(
@@ -197,13 +201,17 @@ function updatePackageMetadata(packages) {
 
   // eslint-disable-next-line global-require
   const monorepometadata = require('../package.json');
-  const original = monorepometadata.dependencies;
-  const newDependencies = sortEntries(dependencies);
-  if (JSON.stringify(original) !== JSON.stringify(newDependencies)) {
+
+  function updatePackageMetadataWithDependencies(dependencies) {
+    const newDependencies = sortEntries(dependencies);
     monorepometadata.dependencies = newDependencies;
     wf(path.join(root, 'package.json'), `${ JSON.stringify(monorepometadata, null, 2) }\n`);
-    x({ cwd: root }, 'npm', 'install');
   }
+
+  updatePackageMetadataWithDependencies(externalDependencies);
+  x({ cwd: root }, 'npm', 'install');
+  updatePackageMetadataWithDependencies(
+    Object.assign(externalDependencies, internalDependencies));
 }
 
 function installLocally(packages) {
