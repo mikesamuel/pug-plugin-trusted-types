@@ -6,52 +6,17 @@ const crypto = require('crypto');
 const path = require('path');
 
 const constantinople = require('constantinople');
+const stringify = require('js-stringify');
 const { parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 
 const { contentTypeForElement, typeOfAttribute } = require('pug-contracts-trusted-types');
-
-// Names of functions exported by the runtime package.
-const trustedHTMLGuard = 'requireTrustedHTML';
-const trustedScriptGuard = 'requireTrustedScript';
-
-/* eslint-disable array-element-newline */
-// This relates values from security.html.contracts.AttrType to names
-// of functions exported by runtime.js
-const GUARDS_BY_ATTRIBUTE_TYPE = [
-  // Unused
-  null,
-  // Not Sensitive
-  null,
-  // HTML
+const {
   trustedHTMLGuard,
-  // URL
-  'requireTrustedURL',
-  // RESOURCE URL
-  'requireTrustedResourceURL',
-  // TODO STYLE
-  null,
   trustedScriptGuard,
-  // TODO ENUM
-  null,
-  // TODO CONSTANT
-  'reject',
-  // TODO IDENTIFIER
-  null,
-];
-
-const GUARDS_BY_ELEMENT_CONTENT_TYPE = [
-  null,
-  null,
-  // TODO STYLE
-  null,
-  trustedScriptGuard,
-  'reject',
-  'reject',
-  // RCDATA is OK
-  null,
-];
-/* eslint-enable array-element-newline */
+  GUARDS_BY_ATTRIBUTE_TYPE,
+  GUARDS_BY_ELEMENT_CONTENT_TYPE,
+} = require('pug-guards-trusted-types');
 
 function multiMapSet(multimap, key, value) {
   if (!multimap.has(key)) {
@@ -123,7 +88,7 @@ module.exports = Object.freeze({
 
     // If we make any changes, we'll inject runtime support.
     let needsRuntime = false;
-    let needsScrubbers = false;
+    let needsScrubber = false;
 
     // Keep track of the mixin call graph and which might be called in sensitive
     // contexts.
@@ -220,13 +185,13 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
-    function addScrubber(scrubber, expr) {
+    function addScrubber(scrubber, elName, expr) {
       let safeExpr = null;
       if (!isWellFormed(expr)) {
         expr = '{/*Malformed Expression*/}';
       }
-      needsScrubbers = true;
-      safeExpr = ` sc_${ unpredictableSuffix }.${ scrubber }(${ expr }) `;
+      needsScrubber = true;
+      safeExpr = ` sc_${ unpredictableSuffix }.${ scrubber }(${ stringify(elName) }, ${ expr }) `;
       return safeExpr;
     }
 
@@ -405,7 +370,7 @@ module.exports = Object.freeze({
             }
           }
           if (needsDynamicScrubbing) {
-            attributeBlock.val = addScrubber('scrubAttrs', attributeBlock.val);
+            attributeBlock.val = addScrubber('scrubAttrs', elementName, attributeBlock.val);
           } else if (changedAst) {
             attributeBlock.val = generate(jsAst).code;
           }
@@ -480,13 +445,13 @@ module.exports = Object.freeze({
     // Inject the equivalent of
     // - var unpredictableId = ...
     // at the top of the template if it turns out we need it.
-    if (needsScrubbers) {
+    if (needsScrubber) {
       ast.nodes.splice(
         0, 0,
         {
           'type': 'Code',
           // TODO: What do we do about client side compilation?
-          'val': `var sc_${ unpredictableSuffix } = require('pug-scrubbers-trusted-types');`,
+          'val': `var sc_${ unpredictableSuffix } = require('pug-scrubber-trusted-types');`,
           'buffer': false,
           'mustEscape': false,
           'isInline': false,

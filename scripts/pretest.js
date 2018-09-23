@@ -56,9 +56,9 @@ function x(...args) {
       console.error(exc);
     }
     if (status || signal) {
-      console.error(`git commit exited with status ${ status }, signal ${ signal }`);
+      console.error(`${ command } exited with status ${ status }, signal ${ signal }`);
     }
-    throw new Error('git commit failed');
+    throw new Error(`${ command } failed`);
   }
   return trapStdout ? stdout.replace(/\n$/, '') : null;
 }
@@ -220,9 +220,10 @@ function installLocally(packages) {
     const hash = qx('shasum', '-a', '256', tarball);
     const hashFile = path.join(root, 'node_modules', `.${ name }.sha256`);
     if (!e(hashFile) || rf(hashFile) !== hash) {
-      console.log(`INSTALLING ${ name }`);
-      x({ cwd: root }, 'npm', 'uninstall', name);
-      x({ cwd: root }, 'npm', 'install', tarball);
+      console.log(`INSTALLING ${ name } from ${ tarball }`);
+      rmrf(root, 'node_modules', name);
+      x({ cwd: root }, 'mkdir', path.join('node_modules', name));
+      x({ cwd: path.join(root, 'node_modules', name) }, 'tar', 'xzf', path.join(tarball), '--strip-components=1');
       wf(hashFile, hash);
     }
   }
@@ -264,7 +265,7 @@ const packages = computePackageOrder();
 updatePackageMetadata(packages);
 
 console.log('');
-console.log(`INSTALLING SUBPACKAGES ${ packages } LOCALLY`);
+console.log(`INSTALLING SUBPACKAGES ${ packages.map(({ name }) => name) } LOCALLY`);
 installLocally(packages);
 
 console.log('');
