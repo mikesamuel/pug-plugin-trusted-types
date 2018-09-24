@@ -66,7 +66,8 @@ const MALFORMED_MARKUP = new RegExp(
 
 module.exports = Object.freeze({
   // Hook into PUG just before the AST is converted to JS code.
-  preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
+  // eslint-disable-next-line func-name-matching, no-unused-vars
+  preCodeGen: function enforceTrustedTypes(inputAst, options) {
     // PUG provides no way to forward options to plugins, so we piggyback on
     // filterOptions.
     const ttOptions = (options.filterOptions || {}).trustedTypes || {};
