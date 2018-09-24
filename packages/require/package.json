@@ -1,0 +1,34 @@
+{
+  "name": "pug-require",
+  "version": "1.0.2-alpha",
+  "description": "XSS prevention for Pug templates with typesafe exceptions",
+  "main": "plugin.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "lint": "(cd ../.. && npm run lint)",
+    "test": "(cd ../.. && npm test)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikesamuel/pug-plugin-trusted-types.git"
+  },
+  "keywords": [
+    "pug",
+    "template",
+    "require"
+  ],
+  "author": "@mikesamuel",
+  "license": "(MIT OR Apache-2.0)",
+  "bugs": {
+    "url": "https://github.com/mikesamuel/pug-plugin-trusted-types/issues"
+  },
+  "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/require/README.md",
+  "dependencies": {
+    "js-stringify": "^1.0.2",
+    "module-keys": "^1.0.5",
+    "pirates": "^4.0.0",
+    "pug-plugin-trusted-types": "^1.0.2-alpha"
+  }
+}

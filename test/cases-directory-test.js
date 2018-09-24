@@ -21,6 +21,7 @@ const { describe, it } = require('mocha');
 const pug = require('pug');
 const ttPlugin = require('pug-plugin-trusted-types');
 
+const { makeModuleKeys } = require('module-keys');
 const { Mintable } = require('node-sec-patterns');
 const {
   TrustedHTML,
@@ -48,6 +49,7 @@ function requireStub(id) {
       throw new Error(id);
   }
 }
+requireStub.keys = makeModuleKeys();
 
 
 function compareFileTo(file, want, normalize, defaultText = null) {
@@ -215,19 +217,19 @@ describe('case', () => {
             let html = null;
             try {
               // TODO: figure out how to inject this reliably.
-              // eslint-disable-next-line camelcase
-              global.pug_uncheckedConversionToTrustedHtml =
-                (output) => `<!-- TrustedHTML -->\n${ output }\n<!-- /TrustedHTML -->`;
               global.require = requireStub;
               html = fun(locals);
             } finally {
-              // eslint-disable-next-line camelcase
-              global.pug_uncheckedConversionToTrustedHtml = null;
               global.require = null;
             }
+
+            if (TrustedHTML.is(html)) {
+              html = `<!-- TrustedHTML -->\n${ html.content }\n<!-- /TrustedHTML -->`;
+            }
+
             const goldenHtml = endToEndTest.replace(/[.]json$/, '.out.html');
             compareFileTo(
-              goldenHtml, html,
+              goldenHtml, String(html),
               (txt) => trimBlankLinesAtEnd(stripLineContinuations(txt)));
           });
         }

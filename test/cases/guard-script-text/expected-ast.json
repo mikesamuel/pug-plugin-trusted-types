@@ -6,7 +6,8 @@
       "val": "var rt_8dd25b29b41e02e91f7162c0fca6f70e69f4e0b8ad77812734a4254eaaf3f7d9 = require('pug-runtime-trusted-types');",
       "buffer": false,
       "mustEscape": false,
-      "isInline": false
+      "isInline": false,
+      "mayRequire": true
     },
     {
       "type": "Tag",
@@ -106,7 +107,7 @@
     },
     {
       "type": "Code",
-      "val": "pug_html = pug_uncheckedConversionToTrustedHtml(pug_html)",
+      "val": "pug_html = rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.getMinter(require.keys)(pug_html)",
       "buffer": false,
       "mustEscape": false,
       "isInline": false

@@ -69,9 +69,9 @@ module.exports = Object.freeze({
   preCodeGen(inputAst, options) { // eslint-disable-line no-unused-vars
     // PUG provides no way to forward options to plugins, so we piggyback on
     // filterOptions.
-    const report = ((options.filterOptions || {}).trustedTypes || {}).report ||
-      // eslint-disable-next-line no-console
-      console.warn.bind(console);
+    const ttOptions = (options.filterOptions || {}).trustedTypes || {};
+    // eslint-disable-next-line no-console
+    const report = ttOptions.report || console.warn.bind(console);
 
     let ast = null;
     let unpredictableSuffix = null;
@@ -212,12 +212,20 @@ module.exports = Object.freeze({
     // If user expressions have free variables like pug_html then don't bless
     // the output because we'd have to statically analyze the generated JS to
     // preserve output integrity.
-    function checkExpressionDoesNotInterfere(expr) {
+    function checkExpressionDoesNotInterfere(astNode, exprKey) {
+      const expr = astNode[exprKey];
       const seen = new Set();
       function check(jsAst) {
         if (jsAst && typeof jsAst === 'object' && jsAst.type === 'Identifier') {
-          if (/^pug_/.test(jsAst.name) || jsAst.name === 'eval') {
+          const { name } = jsAst;
+          if (/^pug_/.test(name) || name === 'eval') {
             distrust(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
+          } else if (name === 'require' &&
+                     !(Object.hasOwnProperty.call(astNode, 'mayRequire') && astNode.mayRequire)) {
+            // We trust trusted plugin code and PUG code to use the module's private key
+            // but not template code.
+            distrust(`Expression (${ expr }) may interfere with module internals ${ jsAst.name }`);
+            astNode[exprKey] = 'null';
           }
         }
         if (!seen.has(jsAst) && mayTrustOutput) {
@@ -250,7 +258,7 @@ module.exports = Object.freeze({
           if (constantinople(obj.val)) {
             return;
           }
-          checkExpressionDoesNotInterfere(obj.val);
+          checkExpressionDoesNotInterfere(obj, 'val');
           if (obj.buffer) {
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
@@ -278,7 +286,7 @@ module.exports = Object.freeze({
         },
         Mixin(obj) {
           if (obj.call) {
-            checkExpressionDoesNotInterfere(obj.args);
+            checkExpressionDoesNotInterfere(obj, 'args');
             const elName = getElementName();
             const contentType = contentTypeForElement(elName);
             const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
@@ -328,7 +336,7 @@ module.exports = Object.freeze({
               }
             }
           } else {
-            checkExpressionDoesNotInterfere(attr.val);
+            checkExpressionDoesNotInterfere(attr, 'val');
             maybeGuardAttributeValue(
               elementName, attr.name, getValue, attr.val,
               (guardedExpression) => {
@@ -344,7 +352,7 @@ module.exports = Object.freeze({
         const elementName = getElementName() || '*';
         const getValue = valueGetter(policyPath[policyPath.length - 2]);
         for (const attributeBlock of obj) {
-          checkExpressionDoesNotInterfere(attributeBlock.val);
+          checkExpressionDoesNotInterfere(attributeBlock, 'val');
           const jsAst = parseExpression(attributeBlock.val);
           let needsDynamicScrubbing = true;
           let changedAst = false;
@@ -443,8 +451,19 @@ module.exports = Object.freeze({
     guardTextInMixins();
 
     // Inject the equivalent of
-    // - var unpredictableId = ...
+    // - var rt_unpredictableId = ...
     // at the top of the template if it turns out we need it.
+    if (mayTrustOutput) {
+      ast.nodes.push(
+        {
+          'type': 'Code',
+          'val': `pug_html = rt_${ unpredictableSuffix }.getMinter(require.keys)(pug_html)`,
+          'buffer': false,
+          'mustEscape': false,
+          'isInline': false,
+        });
+      needsRuntime = true;
+    }
     if (needsScrubber) {
       ast.nodes.splice(
         0, 0,
@@ -455,6 +474,7 @@ module.exports = Object.freeze({
           'buffer': false,
           'mustEscape': false,
           'isInline': false,
+          'mayRequire': true,
         });
     }
     if (needsRuntime) {
@@ -467,19 +487,10 @@ module.exports = Object.freeze({
           'buffer': false,
           'mustEscape': false,
           'isInline': false,
+          'mayRequire': true,
         });
     }
 
-    if (mayTrustOutput) {
-      ast.nodes.push(
-        {
-          'type': 'Code',
-          'val': 'pug_html = pug_uncheckedConversionToTrustedHtml(pug_html)',
-          'buffer': false,
-          'mustEscape': false,
-          'isInline': false,
-        });
-    }
     return ast;
   },
 });
