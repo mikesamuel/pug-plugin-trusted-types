@@ -178,8 +178,6 @@ for dir in ${ Object.entries(packages).map(([ , { dirname } ]) => dirname).join(
   popd
 done
 
-rm -rf node_modules package-lock && npm install
-git commit -n -m 'regen package-lock' package-lock.json
 git push origin master --tags
 
 `);
