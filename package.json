@@ -39,6 +39,7 @@
     "js-stringify": "^1.0.2",
     "module-keys": "^1.0.5",
     "pirates": "^4.0.0",
+    "template-tag-common": "^4.0.2",
     "web-contract-types": "^1.0.4"
   },
   "devDependencies": {

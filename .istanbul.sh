@@ -6,4 +6,5 @@
   -i 'node_modules/pug-require/**/*.js' \
   -i 'node_modules/pug-runtime-trusted-types/**/*.js' \
   -i 'node_modules/pug-scrubber-trusted-types/**/*.js' \
+  -i 'node_modules/pug-template-tag/**/*.js' \
   ./node_modules/.bin/_mocha
