@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin-trusted-types",
-  "version": "1.0.2-alpha",
+  "version": "1.0.3-alpha",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
   "main": "plugin.js",
   "files": [
@@ -31,7 +31,7 @@
     "@babel/generator": "^7.0.0",
     "@babel/parser": "^7.1.0",
     "js-stringify": "^1.0.2",
-    "pug-contracts-trusted-types": "^1.0.2-alpha",
-    "pug-guards-trusted-types": "^1.0.2-alpha"
+    "pug-contracts-trusted-types": "^1.0.3-alpha",
+    "pug-guards-trusted-types": "^1.0.3-alpha"
   }
 }
