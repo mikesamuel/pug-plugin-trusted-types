@@ -105,7 +105,8 @@ function trimBlankLinesAtEnd(str) {
 
 function stripLineContinuations(str) {
   return str.replace(
-      /(\\+)\n/g,
+    /(\\+)\n/g,
+    // eslint-disable-next-line no-bitwise
     (whole, slashes) => (slashes.length & 1 ? slashes.substring(1) : whole));
 }
 
