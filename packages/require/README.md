@@ -7,7 +7,7 @@ Allows compiling and loading [Pug](https://pugjs.org) templates via `require('./
 
 This makes it easy to use Pug with plugins that need to be able to
 `require` support code.
-For example, the [trusted types](https://npmjs.com/pug-plugin-trusted-types)
+For example, the [trusted types](https://npmjs.com/package/pug-plugin-trusted-types)
 plugin *\</shameless-plug\>*.
 
 ## Installation
