@@ -1,8 +1,8 @@
 {
   "name": "pug-require",
   "version": "1.0.3-alpha",
-  "description": "XSS prevention for Pug templates with typesafe exceptions",
-  "main": "plugin.js",
+  "description": "Load Pug templates via require()",
+  "main": "index.js",
   "files": [
     "index.js"
   ],
