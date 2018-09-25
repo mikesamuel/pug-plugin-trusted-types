@@ -64,7 +64,7 @@ function tableOfContentsFor(filename, markdown) {
   }
   return {
     markdown: lines.join('\n'),
-    toc,
+    toc: toc.join(''),
   };
 }
 
@@ -85,9 +85,9 @@ if (require.main === module) {
   for (const filename of filenames) {
     // eslint-disable-next-line no-sync
     const originalContent = fs.readFileSync(filename, { encoding: 'utf8' });
+    // eslint-disable-next-line prefer-const
     let { markdown, toc } = tableOfContentsFor(filename, originalContent);
 
-    toc = toc.join('');
     markdown = replaceTableOfContentsIn(filename, markdown, toc);
 
     if (originalContent !== markdown) {
@@ -96,3 +96,8 @@ if (require.main === module) {
     }
   }
 }
+
+module.exports = {
+  tableOfContentsFor,
+  replaceTableOfContentsIn,
+};

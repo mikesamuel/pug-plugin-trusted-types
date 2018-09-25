@@ -31,6 +31,11 @@ for (const child of fs.readdirSync(packagesDir)) {
   }
 }
 
+const {
+  tableOfContentsFor,
+  replaceTableOfContentsIn,
+} = require('../scripts/markdown-table-of-contents.js');
+
 
 function lookForUndefinedLinks(markdownPath) {
   let markdown = fs.readFileSync(markdownPath, { encoding: 'utf8' });
@@ -115,6 +120,16 @@ describe('doc', () => {
     for (const [ name, mdPath ] of Object.entries(markdownPaths)) {
       describe(name, () => {
         hackyUpdoc(mdPath);
+      });
+    }
+  });
+  describe('tocs', () => {
+    for (const [ name, mdPath ] of Object.entries(markdownPaths)) {
+      it(name, () => {
+        const originalMarkdown = fs.readFileSync(mdPath, { encoding: 'utf8' });
+        const { markdown, toc } = tableOfContentsFor(mdPath, originalMarkdown);
+        const markdownProcessed = replaceTableOfContentsIn(mdPath, markdown, toc);
+        expect(originalMarkdown).to.equal(markdownProcessed, mdPath);
       });
     }
   });
