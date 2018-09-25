@@ -4,11 +4,6 @@
 
 Allows compiling and loading [Pug](https://pugjs.org) templates via `require('./path/to/template.pug')`.
 
-This makes it easy to use Pug with plugins that need to be able to
-`require` support code.
-For example, the [trusted types](https://npmjs.com/package/pug-plugin-trusted-types)
-plugin *\</shameless-plug\>*.
-
 ## Installation
 
 ```bash
@@ -36,6 +31,8 @@ const html = pugTemplateFunction({ /* local variables */ });
 
 pugOptions : A Pug [options bundle](https://pugjs.org/api/reference.html#options)
 
+Regardless of options, attaches the [trusted types plugin][].
+
 ### uninstall()
 
 Detaches the Pug hook.
@@ -47,3 +44,6 @@ A no-op if not currently installed.
 Undoes a call to `uninstall`.
 
 A no-op if already installed.
+
+
+[trusted types plugin]: https://npmjs.com/package/pug-plugin-trusted-types

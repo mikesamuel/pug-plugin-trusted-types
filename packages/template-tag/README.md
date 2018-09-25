@@ -130,11 +130,11 @@ Regardless of options, the pug template function always attaches two plugins:
 
 1.  A debug plugin that rewrites line numbers and files so that error messages
     point to the JavaScript code that defined the template.
-2.  The [Trusted Types plugin][safe pug]
+2.  The [Trusted Types plugin][safe Pug]
     makes the template resistant to XSS since it is not a goal of this project
     to make it easier to produce unsafe templates.
 
 
-[safe pug]: https://npmjs.com/package/pug-plugin-trusted-types
+[safe Pug]: https://npmjs.com/package/pug-plugin-trusted-types
 [options bundle]: https://pugjs.org/api/reference.html#options
 [template tag]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
