@@ -19,4 +19,4 @@ describe('pug-require', () => {
   });
 });
 
-// TODO: test uninstall, reinstall
+// TODO: test configure uninstall, reinstall
