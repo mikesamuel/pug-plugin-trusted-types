@@ -14,6 +14,13 @@ Hooks into [Pug](https://pugjs.org) to add
 to reduce the risk of XSS.
 
 <!-- TOC -->
+*  [Usage](#hdr-usage)
+,   *  [Requiring Templates](#hdr-requiring-templates)
+,   *  [Inline Templates](#hdr-inline-templates)
+,   *  [Pre-compiled or manually compiled Templates](#hdr-pre-compiled-or-manually-compiled-templates)
+,      *  [Before](#hdr-before)
+,      *  [After](#hdr-after)
+,*  [Double checking expressions](#hdr-double-checking-expressions)
 
 <!-- /TOC -->
 
@@ -41,7 +48,7 @@ console.log(html);
 ```
 
 
-## Usage
+## Usage                                <a name="hdr-usage"></a>
 
 There are several ways to use safe Pug templates.
 
@@ -52,7 +59,7 @@ Pug compiles templates to JavaScript which it loads by
 [calling `new Function()`][pug-compile-code-snippet] so does not
 load in a module context.
 
-### Requiring Templates
+### Requiring Templates                 <a name="hdr-requiring-templates"></a>
 
 First you need a dependency:
 
@@ -83,7 +90,7 @@ console.log(myTemplate({ x: 'javascript:evil()' }));
 See [*pug-require*](https://www.npmjs.com/package/pug-require) for
 more details.
 
-### Inline Templates
+### Inline Templates                    <a name="hdr-inline-templates"></a>
 
 First you need a dependency:
 
@@ -109,7 +116,7 @@ See [*pug-template-tag*](https://www.npmjs.com/package/pug-template-tag) for
 more details including how to configure templates.
 
 
-### Pre-compiled or manually compiled Templates
+### Pre-compiled or manually compiled Templates   <a name="hdr-pre-compiled-or-manually-compiled-templates"></a>
 
 First you need to install Pug and the Trusted Types Plugin.
 
@@ -119,7 +126,7 @@ npm install --save pug pug-plugin-trusted-types
 
 Then add the plugin to the `plugins` field of your Pug options object.
 
-#### Before
+#### Before                             <a name="hdr-before"></a>
 
 ```js
 const pug = require('pug');
@@ -131,7 +138,7 @@ const myTemplate = pug.compile(
     });
 ```
 
-#### After
+#### After                              <a name="hdr-after"></a>
 
 ```js
 const pug = require('pug');
@@ -152,7 +159,7 @@ Putting it at the end of any existing `plugins` array should suffice.
 *postCodeGen* stage plugins could undo security guarantees even if the
 trusted types plugin runs late.
 
-## Double checking expressions
+## Double checking expressions          <a name="hdr-double-checking-expressions"></a>
 
 Expressions in Pug templates, whether for attribute values or for text nodes, are
 double-checked as described below.
