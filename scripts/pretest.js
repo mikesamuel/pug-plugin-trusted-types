@@ -243,19 +243,18 @@ function computeCoverageConfig(packages) {
   // the tests will be resolving subpackages.
   // The default excludes will skip all of node_modules.
   // Generate a custom config file with just the right directories.
-  let istanbulConfig = `#!/bin/bash
+
+  const namesToCover = packages.map(({ name }) => name)
+    // Contracts are tested as part of polymer-resin.
+    .filter((name) => name !== 'pug-contracts-trusted-types');
+  const includePattern = `node_modules/@(${ namesToCover.join('|') })/**/*.js`;
+
+  const istanbulConfig = `#!/bin/bash
 ./node_modules/.bin/istanbul cover \\
   -no-default-excludes \\
+  -i '${ includePattern }' \\
+  ./node_modules/.bin/_mocha
 `;
-
-  for (const { name } of packages) {
-    // Contracts are tested as part of polymer-resin.
-    if (name !== 'pug-contracts-trusted-types') {
-      istanbulConfig += `  -i 'node_modules/${ name }/**/*.js' \\\n`;
-    }
-  }
-
-  istanbulConfig += '  ./node_modules/.bin/_mocha\n';
 
   wf(path.join(root, '.istanbul.sh'), istanbulConfig);
 }

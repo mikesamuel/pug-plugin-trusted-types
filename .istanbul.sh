@@ -1,10 +1,5 @@
 #!/bin/bash
 ./node_modules/.bin/istanbul cover \
   -no-default-excludes \
-  -i 'node_modules/pug-guards-trusted-types/**/*.js' \
-  -i 'node_modules/pug-plugin-trusted-types/**/*.js' \
-  -i 'node_modules/pug-require/**/*.js' \
-  -i 'node_modules/pug-runtime-trusted-types/**/*.js' \
-  -i 'node_modules/pug-scrubber-trusted-types/**/*.js' \
-  -i 'node_modules/pug-template-tag/**/*.js' \
+  -i 'node_modules/@(pug-guards-trusted-types|pug-plugin-trusted-types|pug-require|pug-runtime-trusted-types|pug-scrubber-trusted-types|pug-template-tag)/**/*.js' \
   ./node_modules/.bin/_mocha
