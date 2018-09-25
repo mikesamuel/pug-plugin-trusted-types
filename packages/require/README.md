@@ -4,13 +4,23 @@
 
 Allows compiling and loading [Pug](https://pugjs.org) templates via `require('./path/to/template.pug')`.
 
-## Installation
+<!-- TOC -->
+*  [Installation](#hdr-installation)
+*  [Usage](#hdr-usage)
+*  [API](#hdr-api)
+   *  [configurePug(pugOptions)](#hdr-configurepug-pugoptions-)
+   *  [uninstall()](#hdr-uninstall-)
+   *  [reinstall()](#hdr-reinstall-)
+
+<!-- /TOC -->
+
+## Installation                         <a name="hdr-installation"></a>
 
 ```bash
 $ npm install pug-require
 ```
 
-## Usage
+## Usage                                <a name="hdr-usage"></a>
 
 ```js
 // Install hooks
@@ -25,21 +35,21 @@ const pugTemplateFunction = require('./path/to/template.pug');
 const html = pugTemplateFunction({ /* local variables */ });
 ```
 
-## API
+## API                                  <a name="hdr-api"></a>
 
-### configurePug(pugOptions)
+### configurePug(pugOptions)            <a name="hdr-configurepug-pugoptions-"></a>
 
 pugOptions : A Pug [options bundle](https://pugjs.org/api/reference.html#options)
 
 Regardless of options, attaches the [trusted types plugin][].
 
-### uninstall()
+### uninstall()                         <a name="hdr-uninstall-"></a>
 
 Detaches the Pug hook.
 
 A no-op if not currently installed.
 
-### reinstall()
+### reinstall()                         <a name="hdr-reinstall-"></a>
 
 Undoes a call to `uninstall`.
 

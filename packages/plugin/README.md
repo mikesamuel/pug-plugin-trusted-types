@@ -15,12 +15,12 @@ to reduce the risk of XSS.
 
 <!-- TOC -->
 *  [Usage](#hdr-usage)
-,   *  [Requiring Templates](#hdr-requiring-templates)
-,   *  [Inline Templates](#hdr-inline-templates)
-,   *  [Pre-compiled or manually compiled Templates](#hdr-pre-compiled-or-manually-compiled-templates)
-,      *  [Before](#hdr-before)
-,      *  [After](#hdr-after)
-,*  [Double checking expressions](#hdr-double-checking-expressions)
+   *  [Requiring Templates](#hdr-requiring-templates)
+   *  [Inline Templates](#hdr-inline-templates)
+   *  [Pre-compiled or manually compiled Templates](#hdr-pre-compiled-or-manually-compiled-templates)
+      *  [Before](#hdr-before)
+      *  [After](#hdr-after)
+*  [Double checking expressions](#hdr-double-checking-expressions)
 
 <!-- /TOC -->
 

@@ -5,13 +5,24 @@
 A template tag that allows defining [safe Pug][] templates inline in
 JavaScript or TypeScript code.
 
-## Installation
+<!-- TOC -->
+*  [Installation](#hdr-installation)
+*  [Usage](#hdr-usage)
+*  [API](#hdr-api)
+   *  [pug(pugOptions)](#hdr-pug-pugoptions-)
+   *  [pug`...`](#hdr-pug-)
+*  [Module System](#hdr-module-system)
+*  [Plugins](#hdr-plugins)
+
+<!-- /TOC -->
+
+## Installation                         <a name="hdr-installation"></a>
 
 ```bash
 $ npm install pug-template-tag
 ```
 
-## Usage
+## Usage                                <a name="hdr-usage"></a>
 
 ```js
 // Load the template tag.
@@ -47,18 +58,18 @@ const templateBar = pug`
   .bar= text`;
 ```
 
-## API
+## API                                  <a name="hdr-api"></a>
 
 Package *pug-template-tag* exports a function that may either be called as
 a [template tag][] to define a template or as a function that takes an
 [options bundle][].
 
-### pug(pugOptions)
+### pug(pugOptions)                     <a name="hdr-pug-pugoptions-"></a>
 
 When called with a Pug [options bundle][], the exported function returns
 an instance of the same function but which uses the given options bundle.
 
-### pug`...`
+### pug`...`                            <a name="hdr-pug-"></a>
 
 When called as a template tag:
 
@@ -118,13 +129,13 @@ characters so `\n` will reach the Pug compiler unchanged.
 
 -->
 
-## Module System
+## Module System                        <a name="hdr-module-system"></a>
 
 The pug template functions makes sure that error trace will point to
 the source file.
 
 
-## Plugins
+## Plugins                              <a name="hdr-plugins"></a>
 
 Regardless of options, the pug template function always attaches two plugins:
 

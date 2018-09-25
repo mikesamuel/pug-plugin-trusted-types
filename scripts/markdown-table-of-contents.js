@@ -69,13 +69,15 @@ function tableOfContentsFor(filename, markdown) {
 }
 
 function replaceTableOfContentsIn(filename, markdown, toc) {
-  const match = /(\n<!-- TOC -->\n).*?(\n<!-- \/TOC -->\n)/.exec(markdown);
-  if (!match) {
+  const match = /(\n<!-- TOC -->\n)(?:[^\n]|\n(?!<!--))*(\n<!-- \/TOC -->\n)/.exec(markdown);
+  if (match) {
+    return `${ markdown.substring(0, match.index) }${ match[1] }${ toc }${ match[2] }${
+      markdown.substring(match.index + match[0].length) }`;
+  }
+  if (toc) {
     throw new Error(`${ filename }: Cannot find <!-- TOC --> delimited space for the table of contents`);
   }
-
-  return `${ markdown.substring(0, match.index) }${ match[1] }${ toc }${ match[2] }${
-    markdown.substring(match.index + match[0].length) }`;
+  return markdown;
 }
 
 if (require.main === module) {
@@ -85,7 +87,7 @@ if (require.main === module) {
     const originalContent = fs.readFileSync(filename, { encoding: 'utf8' });
     let { markdown, toc } = tableOfContentsFor(filename, originalContent);
 
-    toc = toc.join();
+    toc = toc.join('');
     markdown = replaceTableOfContentsIn(filename, markdown, toc);
 
     if (originalContent !== markdown) {

@@ -7,4 +7,3 @@ This is supporting code for the
 for the [Pug](https://pugjs.org/) template language.
 
 [![npm](https://img.shields.io/npm/v/pug-contracts-trusted-types.svg)](https://www.npmjs.com/package/pug-contracts-trusted-types)
-
