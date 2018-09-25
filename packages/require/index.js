@@ -4,10 +4,13 @@ const { addHook } = require('pirates');
 const { compileClientWithDependenciesTracked } = require('pug');
 const stringify = require('js-stringify');
 
+const { isArray } = Array;
 const { assign, create, hasOwnProperty } = Object;
 const { apply } = Reflect;
 
-let config = create(null);
+const ttPlugin = require('pug-plugin-trusted-types');
+
+let config = null;
 
 function compilePugToModule(code, filename) {
   const optionsForFile = assign(
@@ -27,12 +30,26 @@ function compilePugToModule(code, filename) {
 module.exports = ${ name };`;
 }
 
-function configurePug(pugOptions) {
-  if (apply(hasOwnProperty, pugOptions, [ '__proto__' ])) {
+function configurePug(options) {
+  if (apply(hasOwnProperty, options, [ '__proto__' ])) {
     // __proto__ interacts badly with Object.assign
     throw new Error();
   }
-  config = pugOptions;
+
+  const givenPlugins = options && options.plugins;
+  const plugins = isArray(givenPlugins) ? [ ...givenPlugins ] : [];
+  let addTtPlugin = true;
+  for (let i = 0, len = plugins.length; i < len; ++i) {
+    if (plugins[i] === ttPlugin) {
+      addTtPlugin = false;
+      break;
+    }
+  }
+  if (addTtPlugin) {
+    plugins[plugins.length] = ttPlugin;
+  }
+
+  config = assign(create(null), options, { plugins });
 }
 
 let revertFn = null;
@@ -61,4 +78,5 @@ module.exports = {
   uninstall,
 };
 
+configurePug({});
 reinstall();
