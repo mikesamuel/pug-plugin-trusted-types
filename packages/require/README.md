@@ -1,7 +1,6 @@
 # Pug Require
 
 [![npm](https://img.shields.io/npm/v/pug-require.svg)](https://www.npmjs.com/package/pug-require)
-[![Install Size](https://packagephobia.now.sh/badge?p=pug-require)](https://packagephobia.now.sh/result?p=pug-require)
 
 Allows compiling and loading [Pug](https://pugjs.org) templates via `require('./path/to/template.pug')`.
 

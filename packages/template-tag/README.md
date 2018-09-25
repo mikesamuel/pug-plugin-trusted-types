@@ -1,7 +1,6 @@
 # Pug Template Tag
 
 [![npm](https://img.shields.io/npm/v/pug-template-tag.svg)](https://www.npmjs.com/package/pug-template-tag)
-[![Install Size](https://packagephobia.now.sh/badge?p=pug-template-tag)](https://packagephobia.now.sh/result?p=pug-template-tag)
 
 A template tag that allows defining [safe Pug][] templates inline in
 JavaScript or TypeScript code.
