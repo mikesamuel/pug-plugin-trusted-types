@@ -85,6 +85,8 @@ function cp(...args) {
 }
 
 
+// TODO: reenable
+// eslint-disable-next-line no-unused-vars
 function fetchContracts() {
   // Keep contracts up-to-date with polymer-resin
   const polymerResinVersion = qx('npm', 'info', 'polymer-resin', 'version');
@@ -260,7 +262,8 @@ function computeCoverageConfig(packages) {
 }
 
 if (require.main === module) {
-  fetchContracts();
+  // TODO: push new polymer-resin and reenable
+  // fetchContracts();
 
   console.log('');
   console.log('COMPUTING PACKAGE ORDER');

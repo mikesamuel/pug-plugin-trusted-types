@@ -20,4 +20,31 @@ describe('contracts', () => {
       // eslint-disable-next-line no-magic-numbers
       .to.equal(4);
   });
+  it('link rel=alternate', () => {
+    expect(contracts.typeOfAttribute(
+      'link', 'href',
+      // Getter for value of other attributes where known.
+      (x) => (x === 'rel' ? 'alternate' : null)))
+      // 3 means TRUSTED_URL
+      // eslint-disable-next-line no-magic-numbers
+      .to.equal(3);
+  });
+  it('link rel=stylesheet', () => {
+    expect(contracts.typeOfAttribute(
+      'link', 'href',
+      // Getter for value of other attributes where known.
+      (x) => (x === 'rel' ? 'stylesheet' : null)))
+      // 4 means TRUSTED_RESOURCE_URL
+      // eslint-disable-next-line no-magic-numbers
+      .to.equal(4);
+  });
+  it('link rel=?', () => {
+    expect(contracts.typeOfAttribute(
+      'link', 'href',
+      // Getter for value of other attributes where known.
+      () => null))
+      // 4 means TRUSTED_RESOURCE_URL
+      // eslint-disable-next-line no-magic-numbers
+      .to.equal(4);
+  });
 });

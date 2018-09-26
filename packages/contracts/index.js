@@ -111,7 +111,6 @@ security.html.contracts.typeOfAttribute =
       var attrInfoArray = elementInfo[attrName];
       if (attrInfoArray instanceof Array) {
         var valueCache = null;  // Cache calls to getValue
-        var requiredValueNotFound = false;
         for (var i = 0, n = attrInfoArray.length; i < n; ++i) {
           var attrInfo = attrInfoArray[i];
           var contingentAttr = attrInfo.contingentAttribute;
@@ -126,15 +125,7 @@ security.html.contracts.typeOfAttribute =
               : valueCache[contingentAttr] = getValue(contingentAttr);
           if (actualValue === attrInfo.requiredValue) {
             return attrInfo.contract;
-          } else if (actualValue == null /* intentionally match undefined */) {
-            requiredValueNotFound = true;
           }
-        }
-        // Do not fall back to global attributes if there are contingent
-        // attributes defined for which we could not find a value that
-        // definitely ruled out a match.
-        if (requiredValueNotFound) {
-          return null;
         }
       }
     }

@@ -142,8 +142,8 @@ module.exports = Object.freeze({
         if (!values) {
           values = new Map();
           for (const attr of attrs) {
-            if (constantinople(attr.value)) {
-              const value = constantinople.toConstant(attr.value);
+            if (constantinople(attr.val)) {
+              const value = constantinople.toConstant(attr.val);
               if (value) {
                 values.set(attr.name, value);
               }
@@ -151,10 +151,21 @@ module.exports = Object.freeze({
           }
           // eslint-disable-next-line no-unused-vars
           for (const attributeBlock of attributeBlocks) {
-            // TODO: incorporate constant properties from attributeBlocks
-            // into values.
-            // TODO: see attributeBlock handler below for way to parse out
-            // name/value pairs.
+            const jsAst = parseExpression(attributeBlock.val);
+            if (jsAst.type === 'ObjectExpression' && jsAst.properties) {
+              for (const property of jsAst.properties) {
+                if (property.type !== 'ObjectProperty' || property.method || property.computed) {
+                  // Can't sanitize getters or methods, or spread elements.
+                  continue;
+                }
+                const attrName = property.key.name || property.key.value;
+                const { code: valueExpression } = generate(property.value);
+                if (constantinople(valueExpression)) {
+                  const value = constantinople.toConstant(valueExpression);
+                  values.set(attrName, value);
+                }
+              }
+            }
           }
         }
 
@@ -201,7 +212,7 @@ module.exports = Object.freeze({
       attrName = String(attrName).toLowerCase();
       const type = typeOfAttribute(elementName || '*', attrName, getValue);
       if (type === null) {
-        distrust(`Cannot trust dynamic value for attribute ${ attrName }`);
+        distrust(`Cannot trust dynamic value for <${ elementName } ${ attrName }>`);
       } else {
         const guard = GUARDS_BY_ATTRIBUTE_TYPE[type];
         if (guard) {
@@ -434,7 +445,6 @@ module.exports = Object.freeze({
               code.mustEscape = false;
             }
           } else if (tag) {
-            // TODO: magic string
             if (guards.has(trustedScriptGuard)) {
               distrust(
                 `HTML tag <${ tag.name

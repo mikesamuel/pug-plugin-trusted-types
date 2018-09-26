@@ -195,7 +195,7 @@ double-checked as described below.
 
 It doesn't matter whether an attribute value appears via assignment as
 in `element(attribute=expression)` or in an [attribute block][] like
-`element()&{ attribute: expression }`.
+`element()&attributes({ attribute: expression })`.
 
 [pug-compile-code-snippet]: https://github.com/pugjs/pug/blob/a1b046321416fc4ab297b43083ccda25ec8959e5/packages/pug/lib/index.js#L260-L262
 [attribute block]: https://pugjs.org/language/attributes.html#attributes

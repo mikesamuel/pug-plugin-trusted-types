@@ -1,0 +1,7 @@
+{
+  "rel": "import",
+  "x": {
+    "minter": "TrustedURL",
+    "content": "http://example.com/foo"
+  }
+}
