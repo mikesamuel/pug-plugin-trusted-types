@@ -31,12 +31,14 @@ module.exports = ${ name };`;
 }
 
 function configurePug(options) {
+  if (!(options && typeof options === 'object')) {
+    options = {};
+  }
   if (apply(hasOwnProperty, options, [ '__proto__' ])) {
-    // __proto__ interacts badly with Object.assign
-    throw new Error();
+    throw new Error('__proto__ interacts badly with Object.assign');
   }
 
-  const givenPlugins = options && options.plugins;
+  const givenPlugins = options.plugins;
   const plugins = isArray(givenPlugins) ? [ ...givenPlugins ] : [];
   let addTtPlugin = true;
   for (let i = 0, len = plugins.length; i < len; ++i) {
