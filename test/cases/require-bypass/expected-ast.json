@@ -2,42 +2,37 @@
   "type": "Block",
   "nodes": [
     {
-      "type": "Code",
-      "val": "var rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx = require('pug-runtime-trusted-types');",
-      "buffer": false,
-      "mustEscape": false,
-      "isInline": false,
-      "mayRequire": true
+      "type": "Doctype",
+      "val": "html"
     },
     {
       "type": "Tag",
-      "name": "p",
+      "name": "script",
       "selfClosing": false,
       "block": {
         "type": "Block",
         "nodes": [
           {
+            "type": "Comment",
+            "val": " x",
+            "buffer": true
+          },
+          {
             "type": "Tag",
-            "name": "a",
+            "name": "div",
             "selfClosing": false,
             "block": {
               "type": "Block",
               "nodes": [
                 {
                   "type": "Text",
-                  "val": "Link"
+                  "val": "=x"
                 }
               ]
             },
-            "attrs": [
-              {
-                "name": "href",
-                "val": "'http://example.com'",
-                "mustEscape": true
-              }
-            ],
+            "attrs": [],
             "attributeBlocks": [],
-            "isInline": true
+            "isInline": false
           }
         ]
       },
@@ -47,7 +42,7 @@
     },
     {
       "type": "Code",
-      "val": "pug_html = rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.getMinter(require.keys)(pug_html)",
+      "val": "null",
       "buffer": false,
       "mustEscape": false,
       "isInline": false

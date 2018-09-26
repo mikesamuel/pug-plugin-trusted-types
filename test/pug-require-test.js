@@ -107,7 +107,6 @@ describe('pug-require', () => {
             },
           } :
           value));
-    expect(Object.hasOwnProperty.call(options, '__proto__')).to.equal(true);
 
     try {
       expect(() => configurePug(options))
@@ -132,4 +131,3 @@ describe('pug-require', () => {
   });
 });
 
-// TODO: test configure uninstall, reinstall

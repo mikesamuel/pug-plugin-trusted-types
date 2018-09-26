@@ -47,9 +47,9 @@ function transitiveClosure(nodeLabels, graph) {
   } while (madeProgress);
 }
 
-function mayContainTags(elName) {
-  elName = elName.toLowerCase();
-  return elName !== 'script' && elName !== 'style' && elName !== 'iframe';
+function mayContainTags(element) {
+  element = element.toLowerCase();
+  return element !== 'script' && element !== 'style' && element !== 'iframe';
 }
 
 // The matched text is the malformed markup
@@ -114,23 +114,22 @@ module.exports = Object.freeze({
     }
 
     // Walk upwards to find the enclosing tag.
-    function getElementName(skip = 0) {
+    function getContainerName(skip = 0) {
+      let element = null;
+      let mixin = null;
       for (let i = policyPath.length - (skip * 2); (i -= 2) >= 0;) {
-        if (typeof policyPath[i] === 'object' && policyPath[i].type === 'Tag') {
-          return policyPath[i].name.toLowerCase();
+        const policyPathElement = policyPath[i];
+        if (typeof policyPathElement === 'object') {
+          if (policyPathElement.type === 'Tag') {
+            element = policyPathElement.name.toLowerCase();
+            break;
+          } else if (policyPathElement.type === 'Mixin' && !policyPathElement.call) {
+            mixin = policyPathElement.name;
+            break;
+          }
         }
       }
-      return null;
-    }
-
-    function getMixinName() {
-      for (let i = policyPath.length; (i -= 2) >= 0;) {
-        if (typeof policyPath[i] === 'object' &&
-            policyPath[i].type === 'Mixin' && !policyPath[i].call) {
-          return policyPath[i].name;
-        }
-      }
-      return null;
+      return { element, mixin };
     }
 
     // Sometimes the type for one attribute depends on another.
@@ -197,13 +196,13 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
-    function addScrubber(scrubber, elName, expr) {
+    function addScrubber(scrubber, element, expr) {
       let safeExpr = null;
       if (!isWellFormed(expr)) {
         expr = '{/*Malformed Expression*/}';
       }
       needsScrubber = true;
-      safeExpr = ` sc_${ unpredictableSuffix }.${ scrubber }(${ stringify(elName) }, ${ expr }) `;
+      safeExpr = ` sc_${ unpredictableSuffix }.${ scrubber }(${ stringify(element || '*') }, ${ expr }) `;
       return safeExpr;
     }
 
@@ -227,20 +226,30 @@ module.exports = Object.freeze({
     function checkExpressionDoesNotInterfere(astNode, exprKey) {
       const expr = astNode[exprKey];
       const seen = new Set();
+
+      let warnedPug = false;
+      let warnedModule = false;
+
       function check(jsAst) {
         if (jsAst && typeof jsAst === 'object' && jsAst.type === 'Identifier') {
           const { name } = jsAst;
           if (/^pug_/.test(name) || name === 'eval') {
-            distrust(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
+            if (!warnedPug) {
+              distrust(`Expression (${ expr }) may interfere with PUG internals ${ jsAst.name }`);
+              warnedPug = true;
+            }
           } else if (name === 'require' &&
                      !(Object.hasOwnProperty.call(astNode, 'mayRequire') && astNode.mayRequire)) {
             // We trust trusted plugin code and PUG code to use the module's private key
             // but not template code.
-            distrust(`Expression (${ expr }) may interfere with module internals ${ jsAst.name }`);
-            astNode[exprKey] = 'null';
+            if (!warnedModule) {
+              distrust(`Expression (${ expr }) may interfere with module internals ${ jsAst.name }`);
+              astNode[exprKey] = 'null';
+              warnedModule = true;
+            }
           }
         }
-        if (!seen.has(jsAst) && mayTrustOutput) {
+        if (!seen.has(jsAst)) {
           seen.add(jsAst);
           for (const key in jsAst) {
             if (Object.hasOwnProperty.call(jsAst, key)) {
@@ -249,16 +258,14 @@ module.exports = Object.freeze({
           }
         }
       }
-      if (mayTrustOutput) {
-        let jsAst = null;
-        try {
-          jsAst = parseExpression(expr);
-        } catch (exc) {
-          distrust(`Malformed expression (${ expr })`);
-          return;
-        }
-        check(jsAst);
+      let root = null;
+      try {
+        root = parseExpression(expr);
+      } catch (exc) {
+        distrust(`Malformed expression (${ expr })`);
+        return;
       }
+      check(root);
     }
 
     // Keys match keys in the AST.  The input is the referent of policyPath.
@@ -272,23 +279,18 @@ module.exports = Object.freeze({
           }
           checkExpressionDoesNotInterfere(obj, 'val');
           if (obj.buffer) {
-            const elName = getElementName();
-            const contentType = contentTypeForElement(elName);
+            const { element, mixin } = getContainerName();
+            const contentType = contentTypeForElement(element);
             let guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
             if (!guard) {
-              if (elName === null) {
-                const mixinName = getMixinName();
-                if (mixinName) {
-                  deferred.push({ mixinName, code: obj });
-                  return;
-                }
+              if (!element && mixin) {
+                deferred.push({ mixin, code: obj });
+                return;
               }
               guard = trustedHTMLGuard;
             }
-            if (guard) {
-              obj.val = addGuard(guard, obj.val);
-              obj.mustEscape = false;
-            }
+            obj.val = addGuard(guard, obj.val);
+            obj.mustEscape = false;
           }
         },
         Comment(obj) {
@@ -298,32 +300,28 @@ module.exports = Object.freeze({
         },
         Mixin(obj) {
           if (obj.call) {
-            checkExpressionDoesNotInterfere(obj, 'args');
-            const elName = getElementName();
-            const contentType = contentTypeForElement(elName);
+            if (/\S/.test(obj.args)) {
+              checkExpressionDoesNotInterfere(obj, 'args');
+            }
+            const { element, mixin } = getContainerName();
+            const contentType = contentTypeForElement(element);
             const guard = contentType ? GUARDS_BY_ELEMENT_CONTENT_TYPE[contentType] : null;
             if (guard) {
               multiMapSet(calledInSensitiveContext, obj.name, guard);
-            } else {
-              const mixinName = getMixinName();
-              if (mixinName) {
-                mixinCallGraph[mixinName] = mixinCallGraph[mixinName] || [];
-                mixinCallGraph[mixinName].push(obj.name);
-              }
+            } else if (mixin) {
+              mixinCallGraph[mixin] = mixinCallGraph[mixin] || [];
+              mixinCallGraph[mixin].push(obj.name);
             }
           }
         },
         Tag(obj) {
-          const elName = getElementName(1);
-          if (elName) {
-            if (!mayContainTags(elName)) {
-              distrust(`HTML tag <${ obj.name }> appears inside <${ elName }> which cannot have tag content`);
+          const { element, mixin } = getContainerName(1);
+          if (element) {
+            if (!mayContainTags(element)) {
+              distrust(`HTML tag <${ obj.name }> appears inside <${ element }> which cannot have tag content`);
             }
-          } else {
-            const mixinName = getMixinName();
-            if (mixinName) {
-              deferred.push({ mixinName, tag: obj });
-            }
+          } else if (mixin) {
+            deferred.push({ mixin, tag: obj });
           }
         },
         Text(obj) {
@@ -336,8 +334,11 @@ module.exports = Object.freeze({
         },
       },
       attrs(obj) {
-        const getValue = valueGetter(policyPath[policyPath.length - 2]);
-        const elementName = getElementName();
+        const parent = policyPath[policyPath.length - 2];
+        const getValue = valueGetter(parent);
+        // If the attributes appear directly on a call, do not assume any containing
+        // element context
+        const element = parent.call ? null : getContainerName().element;
         // Iterate over attributes and add checks as necessary.
         for (const attr of obj) {
           if (constantinople(attr.val)) {
@@ -350,7 +351,7 @@ module.exports = Object.freeze({
           } else {
             checkExpressionDoesNotInterfere(attr, 'val');
             maybeGuardAttributeValue(
-              elementName, attr.name, getValue, attr.val,
+              element, attr.name, getValue, attr.val,
               (guardedExpression) => {
                 attr.val = guardedExpression;
               });
@@ -361,8 +362,11 @@ module.exports = Object.freeze({
         }
       },
       attributeBlocks(obj) {
-        const elementName = getElementName() || '*';
-        const getValue = valueGetter(policyPath[policyPath.length - 2]);
+        const parent = policyPath[policyPath.length - 2];
+        const getValue = valueGetter(parent);
+        // If the attributes appear directly on a call, do not assume any containing
+        // element context
+        const element = parent.call ? null : getContainerName().element;
         for (const attributeBlock of obj) {
           checkExpressionDoesNotInterfere(attributeBlock, 'val');
           const jsAst = parseExpression(attributeBlock.val);
@@ -380,7 +384,7 @@ module.exports = Object.freeze({
               const { code: valueExpression } = generate(property.value);
               if (!constantinople(valueExpression)) {
                 maybeGuardAttributeValue(
-                  elementName, attrName, getValue, valueExpression,
+                  element, attrName, getValue, valueExpression,
                   // eslint-disable-next-line no-loop-func
                   (newValueExpression) => {
                     changedAst = true;
@@ -390,7 +394,7 @@ module.exports = Object.freeze({
             }
           }
           if (needsDynamicScrubbing) {
-            attributeBlock.val = addScrubber('scrubAttrs', elementName, attributeBlock.val);
+            attributeBlock.val = addScrubber('scrubAttrs', element, attributeBlock.val);
           } else if (changedAst) {
             attributeBlock.val = generate(jsAst).code;
           }
@@ -436,21 +440,19 @@ module.exports = Object.freeze({
     // top level of a <script> element, then guard the code.
     // This may affect uses of the mixin from outside script elements.
     function guardTextInMixins() {
-      for (const { mixinName, code, tag } of deferred) {
-        if (calledInSensitiveContext.has(mixinName)) {
-          const guards = calledInSensitiveContext.get(mixinName);
+      for (const { mixin, code, tag } of deferred) {
+        if (calledInSensitiveContext.has(mixin)) {
+          const guards = calledInSensitiveContext.get(mixin);
           if (code) {
             for (const guard of guards) {
               code.val = addGuard(guard, code.val);
               code.mustEscape = false;
             }
-          } else if (tag) {
-            if (guards.has(trustedScriptGuard)) {
-              distrust(
-                `HTML tag <${ tag.name
-                }> may appear inside <script> which cannot have tag content via call to +${ mixinName }`,
-                tag);
-            }
+          } else if (guards.has(trustedScriptGuard)) {
+            distrust(
+              `HTML tag <${ tag.name
+              }> may appear inside <script> which cannot have tag content via call to +${ mixin }`,
+              tag);
           }
         } else if (code) {
           code.val = addGuard(trustedHTMLGuard, code.val);

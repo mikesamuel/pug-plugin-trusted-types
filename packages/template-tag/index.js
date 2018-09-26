@@ -24,13 +24,13 @@ function allocateNonce() {
 
 function abbrevLeft(str) {
   const [ whole, abbrev ] =
-    /[\s\S]((?:[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]){10})$/.exec(str);
+    /(?:^|[\s\S])((?:[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]){0,10})$/.exec(str);
   return (whole.length === abbrev.length) ? whole : `...${ abbrev }`;
 }
 
 function abbrevRight(str) {
   const [ whole, abbrev ] =
-    /^((?:[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]){10})[\s\S]/.exec(str);
+    /^((?:[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]){0,10})(?:[\s\S]|$)/.exec(str);
   return (whole.length === abbrev.length) ? whole : `${ abbrev }...`;
 }
 
@@ -86,9 +86,17 @@ function makeRestackPlugin({ lineOffset, filename }) {
 }
 
 function computeResultHelper(options, pugSource) {
+  if (!(options && typeof options === 'object')) {
+    options = {};
+  }
+  if (apply(hasOwnProperty, options, [ '__proto__' ])) {
+    // __proto__ interacts badly with assign.
+    throw new Error();
+  }
+
   const callerInfo = getCallerInfo();
 
-  const givenPlugins = options && options.plugins;
+  const givenPlugins = options.plugins;
   const plugins = isArray(givenPlugins) ? [ ...givenPlugins ] : [];
   let addTtPlugin = true;
   for (let i = 0, len = plugins.length; i < len; ++i) {
@@ -102,11 +110,6 @@ function computeResultHelper(options, pugSource) {
   }
   plugins[plugins.length] = makeRestackPlugin(callerInfo);
 
-  if (apply(hasOwnProperty, options, [ '__proto__' ])) {
-    // __proto__ interacts badly with assign.
-    throw new Error();
-  }
-
   const nonce = allocateNonce();
   const basename = `template-${ nonce }.js`;
   const moduleId = `${ module.id.replace(/[^/]*$/, '') }${ basename }`;
@@ -114,7 +117,7 @@ function computeResultHelper(options, pugSource) {
 
   const augOptions = assign(
     create(null),
-    options || {},
+    options,
     {
       name: 'template',
       plugins,
@@ -139,18 +142,4 @@ module.exports = template;`;
   return pugModule.exports;
 }
 
-
-/*
-function makeTemplateTag(options) {
-  const tagFn = memoizedTagFunction(computeStaticHelper, computeResultHelper);
-  return function pug(firstArgument, ...args) {
-    if (calledAsTemplateTagQuick(firstArgument, args.length + 1)) {
-      return tagFn(firstArgument, ...args);
-    }
-    return makeTemplateTag(firstArgument);
-  };
-}
-*/
-
 module.exports = memoizedTagFunction(computeStaticHelper, computeResultHelper);
-// makeTemplateTag(create(null));
