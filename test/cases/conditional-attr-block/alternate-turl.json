@@ -1,0 +1,9 @@
+{
+  "attrs": {
+    "rel": "alternate",
+    "href": {
+      "content": "https://foo.com/index.html",
+      "minter": "TrustedURL"
+    }
+  }
+}

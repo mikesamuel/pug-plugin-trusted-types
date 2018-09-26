@@ -12,6 +12,7 @@ const {
 
 const { create, hasOwnProperty } = Object;
 const { apply } = Reflect;
+const { toLowerCase } = String.prototype;
 
 const {
   GUARDS_BY_ATTRIBUTE_TYPE,
@@ -26,19 +27,34 @@ const GUARDS = {
   requireTrustedURL,
 };
 
+const noArgs = [];
+
+function lcase(str) {
+  return apply(toLowerCase, str, noArgs);
+}
+
 function scrubAttrs(elementName, attrs) {
   const outputAttrs = create(null);
   // This loop mimics a loop in pug.attrs().
   for (const attrName in attrs) {
     if (apply(hasOwnProperty, attrs, [ attrName ])) {
-      // We have to copy value over to avoid polymorphic input attacks.
-      if (attrName !== '__proto__') {
-        outputAttrs[attrName] = attrs[attrName];
+      // We have to copy values over to avoid polymorphic input attacks.
+      const lcAttrName = lcase(attrName);
+      if (lcAttrName !== '__proto__') {
+        outputAttrs[lcAttrName] = attrs[attrName];
       }
     }
   }
   function getValue(attrName) {
-    return `${ outputAttrs[attrName] }`;
+    if (!(attrName in outputAttrs)) {
+      return null;
+    }
+    const value = `${ outputAttrs[attrName] }`;
+    // Reinsert value into output array after stringifying to avoid
+    // pug.attrs from seeing different values due to non-repeatable
+    // toString / valueOf invocations.
+    outputAttrs[attrName] = value;
+    return value;
   }
   for (const attrName in outputAttrs) {
     const value = outputAttrs[attrName];

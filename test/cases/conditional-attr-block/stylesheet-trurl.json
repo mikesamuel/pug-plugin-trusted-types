@@ -1,0 +1,9 @@
+{
+  "attrs": {
+    "rel": "stylesheet",
+    "href": {
+      "content": "https://foo.com/styles.css",
+      "minter": "TrustedResourceURL"
+    }
+  }
+}
