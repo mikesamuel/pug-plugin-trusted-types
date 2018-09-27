@@ -21,6 +21,8 @@ to reduce the risk of XSS.
       *  [Before](#hdr-before)
       *  [After](#hdr-after)
 *  [Double checking expressions](#hdr-double-checking-expressions)
+*  [Plugin Configuration](#hdr-plugin-configuration)
+   *  [report(message)](#hdr-report-message-)
 
 <!-- /TOC -->
 
@@ -196,6 +198,29 @@ double-checked as described below.
 It doesn't matter whether an attribute value appears via assignment as
 in `element(attribute=expression)` or in an [attribute block][] like
 `element()&attributes({ attribute: expression })`.
+
+## Plugin Configuration                 <a name="hdr-plugin-configuration"></a>
+
+Pug doesn't provide a way to directly configure plugins, but this plugin takes into account
+
+```js
+({
+  filtersOptions: {
+    trustedTypes: {
+      report() {
+        // ...
+      }
+    }
+  }
+})
+```
+
+### report(message)                     <a name="hdr-report-message-"></a>
+
+Called if the plugin finds a problem with the template.
+
+By default, this is `console.warn`.
+
 
 [pug-compile-code-snippet]: https://github.com/pugjs/pug/blob/a1b046321416fc4ab297b43083ccda25ec8959e5/packages/pug/lib/index.js#L260-L262
 [attribute block]: https://pugjs.org/language/attributes.html#attributes

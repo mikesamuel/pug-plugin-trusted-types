@@ -1,0 +1,10 @@
+{
+  "src": {
+    "minter": "TrustedResourceURL",
+    "content": "main.js"
+  },
+  "body": {
+    "minter": "TrustedScript",
+    "content": "do everything() while (!done());"
+  }
+}

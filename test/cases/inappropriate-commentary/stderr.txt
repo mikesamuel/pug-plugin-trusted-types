@@ -1,0 +1,2 @@
+cases/inappropriate-commentary/input.pug:3: Invalid comment content " HTML comments end with --> f()"
+cases/inappropriate-commentary/input.pug:6: Invalid comment content " And this can be a --> problem when <script>"

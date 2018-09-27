@@ -1,5 +1,21 @@
 'use strict';
 
+/**
+ * @fileoverview
+ * Exports a Pug plugin that runs just before the Pug code-generator to
+ * add guards to user expressions.
+ *
+ * These user expressions require that dynamic attributes and text nodes
+ * conform to policies defined in ../guards/index.js.
+ *
+ * Which policies apply are determined by ../contracts/index.js.
+ *
+ * The policies are enforced at runtime by ../contracts/index.js.
+ *
+ * If a template avoids known unsafe features, then this plugin also
+ * "blesses" the output as TrustedHTML.
+ */
+
 /* eslint { "complexity": [ 2, { max: 15 } ] } */
 
 const crypto = require('crypto');
@@ -18,6 +34,10 @@ const {
   GUARDS_BY_ELEMENT_CONTENT_TYPE,
 } = require('pug-guards-trusted-types');
 
+/**
+ * Given a multimap that uses sets to collect values,
+ * adds the value to the set for the given key.
+ */
 function multiMapSet(multimap, key, value) {
   if (!multimap.has(key)) {
     multimap.set(key, new Set());
@@ -30,6 +50,14 @@ function multiMapSet(multimap, key, value) {
   return false;
 }
 
+/**
+ * Given a set of graph nodes to labels, propagates labels to
+ * across edges.
+ *
+ * @param nodeLabels a Map of nodes to labels.  Modified in place.
+ * @param graph an adjacency table such that graph[src] is a series of targets,
+ *    nodes adjacent to src.
+ */
 function transitiveClosure(nodeLabels, graph) {
   let madeProgress = false;
   do {
@@ -47,6 +75,11 @@ function transitiveClosure(nodeLabels, graph) {
   } while (madeProgress);
 }
 
+
+/**
+ * True if the named element may contain tag content.
+ * @param element a lower-case HTML element name.
+ */
 function mayContainTags(element) {
   element = element.toLowerCase();
   return element !== 'script' && element !== 'style' && element !== 'iframe';
@@ -77,7 +110,7 @@ module.exports = Object.freeze({
     let ast = null;
     let unpredictableSuffix = null;
     {
-      // Defensively copy.
+      // Defensively copy the AST.
       const astJson = JSON.stringify(inputAst);
       ast = JSON.parse(astJson);
       // Produce a stable but unguessable ID so we can get unmaskable access
@@ -99,13 +132,14 @@ module.exports = Object.freeze({
     const mixinCallGraph = Object.create(null);
 
     // A sequence of (object, key) pairs that were traversed to reach the
-    // current value.
+    // current AST node.
     const policyPath = [];
 
     // Don't convert the output as TrustedHTML if the template uses known unsafe
     // features.
     let mayTrustOutput = true;
 
+    // Logs a message and flips a bit so that we do not bless the output of this template.
     function distrust(msg, optAstNode) {
       const { filename, line } = optAstNode || policyPath[policyPath.length - 2] || {};
       const relfilename = options.basedir ? path.relative(options.basedir, filename) : filename;
@@ -113,7 +147,7 @@ module.exports = Object.freeze({
       mayTrustOutput = false;
     }
 
-    // Walk upwards to find the enclosing tag.
+    // Walk upwards to find the enclosing tag and mixin if any.
     function getContainerName(skip = 0) {
       let element = null;
       let mixin = null;
@@ -140,14 +174,7 @@ module.exports = Object.freeze({
       return function getValue(name) {
         if (!values) {
           values = new Map();
-          for (const attr of attrs) {
-            if (constantinople(attr.val)) {
-              const value = constantinople.toConstant(attr.val);
-              if (value) {
-                values.set(attr.name, value);
-              }
-            }
-          }
+          // Look in &attributes(...) style attribute blocks for any known values.
           // eslint-disable-next-line no-unused-vars
           for (const attributeBlock of attributeBlocks) {
             const jsAst = parseExpression(attributeBlock.val);
@@ -166,6 +193,15 @@ module.exports = Object.freeze({
               }
             }
           }
+          // Find any known values among the (attr=expr, ...) style attributes.
+          for (const attr of attrs) {
+            if (constantinople(attr.val)) {
+              const value = constantinople.toConstant(attr.val);
+              if (value) {
+                values.set(attr.name, value);
+              }
+            }
+          }
         }
 
         name = String(name).toLowerCase();
@@ -173,6 +209,13 @@ module.exports = Object.freeze({
       };
     }
 
+    // Check well-formedness of user expressions.
+    // This may be redundant with Pug codegen, but otherwise
+    // a guard expression like
+    //      rt_abcd.requireFoo(${ expr })
+    // could be bypassed by an expr like ` 'ok'), (x ` that combines
+    // with that to produce an ineffective guard expression:
+    //      rt_abcd.requireFoo('ok'), (x)
     function isWellFormed(expr) {
       try {
         // Should throw if attr.val is not well-formed.
@@ -196,6 +239,8 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
+    // Decorate expression text with a call to a scrubber function
+    // that checks an entire attribute bundle at runtime.
     function addScrubber(scrubber, element, expr) {
       let safeExpr = null;
       if (!isWellFormed(expr)) {
@@ -206,6 +251,13 @@ module.exports = Object.freeze({
       return safeExpr;
     }
 
+    // Add a guard if necessary.
+    // - elementName: string - lower case
+    // - attrName: string
+    // - getValue(attrName) - returns the value of another attribute on the same element if known
+    // - valueExpression: string - a JS expression that computes the result
+    // - onNewValue(newValueExpression) - called with any newly guarded value expression.
+    //     Not called if no guard required.
     function maybeGuardAttributeValue(
       elementName, attrName, getValue, valueExpression, onNewValue) {
       attrName = String(attrName).toLowerCase();
@@ -268,12 +320,16 @@ module.exports = Object.freeze({
       check(root);
     }
 
-    // Keys match keys in the AST.  The input is the referent of policyPath.
+    // Keys match keys in the Pug AST.  The input is the referent of policyPath.
     const policy = {
       __proto__: null,
       type: {
         __proto__: null,
         Code(obj) {
+          // When we see a code block, sanity check it, and if it specifies text content,
+          // add any guards needed.
+          // If the code appears in a mixin we might have to defer adding guards until we
+          // understand the mixin call graph.
           if (constantinople(obj.val)) {
             return;
           }
@@ -294,11 +350,15 @@ module.exports = Object.freeze({
           }
         },
         Comment(obj) {
+          // User comments can lead to confusing tokenization since
+          // -->
+          // seems like it should run to end of line but does not.
           if (/--|^-?$/.test(obj.val)) {
             distrust(`Invalid comment content ${ JSON.stringify(obj.val) }`);
           }
         },
         Mixin(obj) {
+          // Both calls and definitions have type:'Mixin'
           if (obj.call) {
             if (/\S/.test(obj.args)) {
               checkExpressionDoesNotInterfere(obj, 'args');
@@ -315,6 +375,9 @@ module.exports = Object.freeze({
           }
         },
         Tag(obj) {
+          // Record information about which contexts tags appear in so we can avoid
+          // confusion due to tag-like content in non-tag contexts like
+          // <script><div>
           const { element, mixin } = getContainerName(1);
           if (element) {
             if (!mayContainTags(element)) {
@@ -325,6 +388,7 @@ module.exports = Object.freeze({
           }
         },
         Text(obj) {
+          // Inline HTML is a token-level integrity risk.
           if (obj.isHtml) {
             const match = MALFORMED_MARKUP.exec(obj.val);
             if (match) {
@@ -333,6 +397,7 @@ module.exports = Object.freeze({
           }
         },
       },
+      // "attrs"'s value maps HTML attribute names to AST nodes representing value expressions.
       attrs(obj) {
         const parent = policyPath[policyPath.length - 2];
         const getValue = valueGetter(parent);
@@ -345,6 +410,7 @@ module.exports = Object.freeze({
             if (!attr.mustEscape) {
               const constant = constantinople.toConstant(attr.val);
               if (/"/.test(constant)) {
+                // TODO: upstream a fix to pug_attr so that pug_attr('name', 'val">', false).
                 distrust(`Attribute value ${ constant } breaks attribute quoting`);
               }
             }
@@ -356,11 +422,12 @@ module.exports = Object.freeze({
                 attr.val = guardedExpression;
               });
             if (!attr.mustEscape) {
-              distrust('Attribute value must be escaped');
+              distrust(`The value of the ${ attr.name } attribute must be escaped`);
             }
           }
         }
       },
+      // "attributeBlocks" allow a single expression to specify a group of attributes.
       attributeBlocks(obj) {
         const parent = policyPath[policyPath.length - 2];
         const getValue = valueGetter(parent);
@@ -369,6 +436,7 @@ module.exports = Object.freeze({
         const element = parent.call ? null : getContainerName().element;
         for (const attributeBlock of obj) {
           checkExpressionDoesNotInterfere(attributeBlock, 'val');
+          // Parse the expression and look for constant properties to guard.
           const jsAst = parseExpression(attributeBlock.val);
           let needsDynamicScrubbing = true;
           let changedAst = false;
@@ -393,6 +461,8 @@ module.exports = Object.freeze({
               }
             }
           }
+          // If not all the property names are known, then we need to depend on a scrubber
+          // library that picks guards at render time.
           if (needsDynamicScrubbing) {
             attributeBlock.val = addScrubber('scrubAttrs', element, attributeBlock.val);
           } else if (changedAst) {
@@ -482,7 +552,7 @@ module.exports = Object.freeze({
         0, 0,
         {
           'type': 'Code',
-          // TODO: What do we do about client side compilation?
+          // TODO: How does this affect client-side compilation?
           'val': `var sc_${ unpredictableSuffix } = require('pug-scrubber-trusted-types');`,
           'buffer': false,
           'mustEscape': false,
@@ -495,7 +565,7 @@ module.exports = Object.freeze({
         0, 0,
         {
           'type': 'Code',
-          // TODO: What do we do about client side compilation?
+          // TODO: How does this affect client-side compilation?
           'val': `var rt_${ unpredictableSuffix } = require('pug-runtime-trusted-types');`,
           'buffer': false,
           'mustEscape': false,
