@@ -1,6 +1,6 @@
 {
   "name": "pug-plugin-monorepo",
-  "version": "1.0.6-alpha",
+  "version": "1.0.7-alpha",
   "description": "XSS prevention for Pug templates with typesafe exceptions",
   "main": "no-such-file.js",
   "files": [],
