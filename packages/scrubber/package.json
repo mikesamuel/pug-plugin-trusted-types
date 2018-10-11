@@ -1,14 +1,14 @@
 {
   "name": "pug-scrubber-trusted-types",
-  "version": "1.0.7-alpha",
+  "version": "1.0.8-alpha",
   "description": "Scrubs attribute blocks at PUG render time",
   "main": "index.js",
   "files": [
     "index.js"
   ],
   "dependencies": {
-    "pug-contracts-trusted-types": "^1.0.7-alpha",
-    "pug-guards-trusted-types": "^1.0.7-alpha"
+    "pug-contracts-trusted-types": "^1.0.8-alpha",
+    "pug-guards-trusted-types": "^1.0.8-alpha"
   },
   "scripts": {
     "lint": "(cd ../.. && npm run lint)",
