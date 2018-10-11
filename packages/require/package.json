@@ -26,8 +26,7 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/require/README.md",
   "dependencies": {
-    "js-stringify": "^1.0.2",
-    "module-keys": "^1.0.7",
+    "module-keys": "^1.0.9",
     "pirates": "^4.0.0",
     "pug-plugin-trusted-types": "^1.0.7-alpha"
   }

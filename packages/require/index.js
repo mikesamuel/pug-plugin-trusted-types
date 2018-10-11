@@ -2,7 +2,6 @@
 
 const { addHook } = require('pirates');
 const { compileClientWithDependenciesTracked } = require('pug');
-const stringify = require('js-stringify');
 
 const { isArray } = Array;
 const { assign, create, hasOwnProperty } = Object;
@@ -25,7 +24,7 @@ function compilePugToModule(code, filename) {
   }
 
   // Pack the prologue onto one line to preserve line numbers as apparent to pug-codegen.
-  return `'use strict'; require('module-keys/cjs').polyfill(module, require, ${ stringify(filename) }); ${ body }
+  return `'use strict'; require('module-keys/cjs').polyfill(module, require); ${ body }
 
 module.exports = ${ name };`;
 }

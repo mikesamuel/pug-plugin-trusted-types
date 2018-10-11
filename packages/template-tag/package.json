@@ -26,10 +26,10 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/require/README.md",
   "dependencies": {
-    "module-keys": "^1.0.7",
+    "module-keys": "^1.0.9",
     "pug-plugin-trusted-types": "^1.0.7-alpha",
     "pug-runtime-trusted-types": "^1.0.7-alpha",
     "pug-scrubber-trusted-types": "^1.0.7-alpha",
-    "template-tag-common": "^4.0.3"
+    "template-tag-common": "^4.0.4"
   }
 }
