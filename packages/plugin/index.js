@@ -276,8 +276,16 @@ module.exports = Object.freeze({
     // the output because we'd have to statically analyze the generated JS to
     // preserve output integrity.
     function checkExpressionDoesNotInterfere(astNode, exprKey) {
-      const expr = astNode[exprKey];
+      let expr = astNode[exprKey];
       const seen = new Set();
+
+      const type = typeof expr;
+      if (type !== 'string') {
+        // expr may be true, not "true".
+        // This occurs for inferred expressions like valueless attributes.
+        expr = `${ expr }`;
+        astNode[exprKey] = expr;
+      }
 
       let warnedPug = false;
       let warnedModule = false;
