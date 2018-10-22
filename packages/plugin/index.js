@@ -23,7 +23,7 @@ const path = require('path');
 
 const constantinople = require('constantinople');
 const stringify = require('js-stringify');
-const { parseExpression } = require('@babel/parser');
+const { parse, parseExpression } = require('@babel/parser');
 const { default: generate } = require('@babel/generator');
 
 const { contentTypeForElement, typeOfAttribute } = require('pug-contracts-trusted-types');
@@ -275,7 +275,7 @@ module.exports = Object.freeze({
     // If user expressions have free variables like pug_html then don't bless
     // the output because we'd have to statically analyze the generated JS to
     // preserve output integrity.
-    function checkExpressionDoesNotInterfere(astNode, exprKey) {
+    function checkCodeDoesNotInterfere(astNode, exprKey, isExpression) {
       let expr = astNode[exprKey];
       const seen = new Set();
 
@@ -320,7 +320,7 @@ module.exports = Object.freeze({
       }
       let root = null;
       try {
-        root = parseExpression(expr);
+        root = isExpression ? parseExpression(expr) : parse(expr);
       } catch (exc) {
         distrust(`Malformed expression (${ expr })`);
         return;
@@ -341,7 +341,7 @@ module.exports = Object.freeze({
           if (constantinople(obj.val)) {
             return;
           }
-          checkExpressionDoesNotInterfere(obj, 'val');
+          checkCodeDoesNotInterfere(obj, 'val', obj.buffer);
           if (obj.buffer) {
             const { element, mixin } = getContainerName();
             const contentType = contentTypeForElement(element);
@@ -369,7 +369,7 @@ module.exports = Object.freeze({
           // Both calls and definitions have type:'Mixin'
           if (obj.call) {
             if (/\S/.test(obj.args)) {
-              checkExpressionDoesNotInterfere(obj, 'args');
+              checkCodeDoesNotInterfere(obj, 'args', true);
             }
             const { element, mixin } = getContainerName();
             const contentType = contentTypeForElement(element);
@@ -423,7 +423,7 @@ module.exports = Object.freeze({
               }
             }
           } else {
-            checkExpressionDoesNotInterfere(attr, 'val');
+            checkCodeDoesNotInterfere(attr, 'val', true);
             maybeGuardAttributeValue(
               element, attr.name, getValue, attr.val,
               (guardedExpression) => {
@@ -443,7 +443,7 @@ module.exports = Object.freeze({
         // element context
         const element = parent.call ? null : getContainerName().element;
         for (const attributeBlock of obj) {
-          checkExpressionDoesNotInterfere(attributeBlock, 'val');
+          checkCodeDoesNotInterfere(attributeBlock, 'val', true);
           // Parse the expression and look for constant properties to guard.
           const jsAst = parseExpression(attributeBlock.val);
           let needsDynamicScrubbing = true;
