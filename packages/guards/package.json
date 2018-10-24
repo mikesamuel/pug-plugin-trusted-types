@@ -1,6 +1,6 @@
 {
   "name": "pug-guards-trusted-types",
-  "version": "1.0.10-alpha",
+  "version": "1.0.11-alpha",
   "description": "Relates type enums to guard function names",
   "main": "index.js",
   "files": [
