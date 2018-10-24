@@ -21,7 +21,13 @@ to reduce the risk of XSS.
       *  [Before](#hdr-before)
       *  [After](#hdr-after)
 *  [Double checking expressions](#hdr-double-checking-expressions)
+*  [Automagic](#hdr-automagic)
+   *  [CSRF (Cross-Site Request Forgery) Protection](#hdr-csrf-cross-site-request-forgery-protection)
+   *  [Content-Security-Policy](#hdr-content-security-policy)
 *  [Plugin Configuration](#hdr-plugin-configuration)
+   *  [csrfInputName](#hdr-csrfinputname)
+   *  [csrfInputValueExpression](#hdr-csrfinputvalueexpression)
+   *  [nonceValueExpression](#hdr-noncevalueexpression)
    *  [report(message)](#hdr-report-message-)
 
 <!-- /TOC -->
@@ -199,6 +205,106 @@ It doesn't matter whether an attribute value appears via assignment as
 in `element(attribute=expression)` or in an [attribute block][] like
 `element()&attributes({ attribute: expression })`.
 
+## Automagic                            <a name="hdr-automagic"></a>
+
+### CSRF (Cross-Site Request Forgery) Protection   <a name="hdr-csrf-cross-site-request-forgery-protection"></a>
+
+CSRF Protection works by putting enough information in `<form>`s so
+that the server can double check that it served the form.
+
+[Configure](#hdr-plugin-configuration) the plugin with options like
+
+```json
+{
+  "csrfInputName":            "csrf",
+  "csrfInputValueExpression": "csrfTokenValue"
+}
+```
+
+When rendering HTML, pass a value to the template for the CSRF input value expression:
+
+```js
+let templateInput = {
+  "csrfTokenValue": "r4Nd0M_NuM83R"
+};
+```
+
+Any form in your PUG template like:
+
+```pug
+form(action='delete' method='POST')
+  button(type='submit') Delete
+```
+
+will have a hidden input added:
+
+```html
+<form action="delete" method="POST">
+  <input name="csrf" type="hidden" value="r4Nd0M_NuM83R"/>
+  <button type="submit">Delete</button>
+</form>
+```
+
+### Content-Security-Policy             <a name="hdr-content-security-policy"></a>
+
+[Strict CSP](https://csp.withgoogle.com/docs/strict-csp.html) explains
+how to use the *Content-Security-Policy* header to protect against
+XSS:
+
+> To enable a strict CSP policy, most applications will need to make the following changes:
+>
+> *  Add a nonce attribute to all `<script>` elements. **Some template systems can do this automatically.**
+> *  Refactor any markup with inline event handlers (onclick, etc.) and javascript: URIs (details).
+> *  For every page load, generate a new nonce, pass it the to the template system, and use the same value in the policy.
+
+To automatically add `nonce` attributes,
+[configure](#hdr-plugin-configuration) the plugin with options like
+
+```json
+{
+  "nonceValueExpression": "sessionScopedRandomString"
+}
+```
+
+And then generate a [strong][] *nonce* for each HTTP response, and pass it to your template:
+
+```js
+let templateInput = {
+  // https://csp.withgoogle.com/docs/faq.html#generating-nonces says > 128b = 16B
+  sessionScopedRandomString: require('uid-safe').sync(18),
+};
+```
+
+**Caveat**: Do not use *npmjs.com/package/nonce*.  It does not provide
+strong nonces, nor does it claim to.
+
+Pug that loads CSS or JavaScript will have nonces automatically added.
+
+```pug
+head
+  link(rel='stylesheet' src='/styles.css')
+  script(src='/script.js')
+  script main()
+```
+
+The output HTML will look like:
+
+```html
+<head>
+  <link rel="stylesheet" src="/styles.css" nonce="7QgTXZjEaat5wrC8JAn0FsBq"/>
+  <script src="/script.js" nonce="7QgTXZjEaat5wrC8JAn0FsBq"></script>
+  <script nonce="7QgTXZjEaat5wrC8JAn0FsBq">main()</script>
+</head>
+```
+
+If your HTTP response has a header like the below then those CSS and
+JavaScript will load, but ones lacking the `nonce` attribute will not.
+
+```
+Content-Security-Policy: default-src 'nonce-7QgTXZjEaat5wrC8JAn0FsBq'
+```
+
+
 ## Plugin Configuration                 <a name="hdr-plugin-configuration"></a>
 
 Pug doesn't provide a way to directly configure plugins, but this plugin takes into account
@@ -215,6 +321,34 @@ Pug doesn't provide a way to directly configure plugins, but this plugin takes i
 })
 ```
 
+### csrfInputName                       <a name="hdr-csrfinputname"></a>
+
+A value for an `<input name>` attribute that is automatically added to
+`<form>` elements to protect against Cross-Site Request Forgery
+(CSRF).
+
+Defaults to `csrfToken`.
+
+See also [CSRF (Cross-Site Request Forgery) Protection](#hdr-csrf-cross-site-request-forgery-protection).
+
+### csrfInputValueExpression            <a name="hdr-csrfinputvalueexpression"></a>
+
+A string containing a JavaScript expression for the value
+corresponding to the `csrfInputName`.
+
+Defaults to `null`.  If `null`, then `<form>`s have no hidden input added.
+
+See also [CSRF (Cross-Site Request Forgery) Protection](#hdr-csrf-cross-site-request-forgery-protection).
+
+### nonceValueExpression                <a name="hdr-noncevalueexpression"></a>
+
+A string containing a JavaScript expression for the value of `nonce`
+attribute automatically added to `<script>` and `<style>` elements.
+
+Defaults to `null`.  If `null`, then `nonce` attributes are not added.
+
+See also [Content-Security-Policy](#hdr-content-security-policy).
+
 ### report(message)                     <a name="hdr-report-message-"></a>
 
 Called if the plugin finds a problem with the template.
@@ -229,3 +363,4 @@ By default, this is `console.warn`.
 [TrustedScript]: https://www.npmjs.com/package/web-contract-types#hdr-class-trustedscript
 [TrustedURL]: https://www.npmjs.com/package/web-contract-types#hdr-class-trustedurl
 [TrustedURL.sanitize]: https://www.npmjs.com/package/web-contract-types#hdr-trustedurl-sanitize
+[strong]: https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator

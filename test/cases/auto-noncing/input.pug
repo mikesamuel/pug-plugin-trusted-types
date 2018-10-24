@@ -1,0 +1,19 @@
+- //!options { "csrfInputName": "csrfToken", "csrfInputValueExpression": "csrfToken", "nonceValueExpression": "nonce" }
+html
+  head
+    = '\n'
+    link(rel='stylesheet' href=stylesheet)
+    = '\n'
+    script(src='common.js')
+    = '\n'
+    style body{font-family:'Comic Sans MS'}
+    = '\n'
+  body
+    h1 Header
+    = '\n'
+    form
+      = '\n'
+      input(name='x' value=x)
+      input(name='y')
+      = '\n'
+      button(type='submit') Submit

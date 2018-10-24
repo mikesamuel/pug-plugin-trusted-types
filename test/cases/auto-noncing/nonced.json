@@ -1,0 +1,10 @@
+{
+  "csrfToken": "t0K3N",
+  "nonce": "r4Nd0m",
+  "stylesheet": {
+    "content": "/styles.css",
+    "minter": "TrustedResourceURL"
+  },
+  "x": "foo",
+  "y": "bar"
+}

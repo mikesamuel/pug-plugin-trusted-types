@@ -103,9 +103,16 @@ module.exports = Object.freeze({
   preCodeGen: function enforceTrustedTypes(inputAst, options) {
     // PUG provides no way to forward options to plugins, so we piggyback on
     // filterOptions.
-    const ttOptions = (options.filterOptions || {}).trustedTypes || {};
+    let {
+      csrfInputName,
+      csrfInputValueExpression, // eslint-disable-line prefer-const
+      nonceValueExpression, // eslint-disable-line prefer-const
+      report,
+    } = (options.filterOptions || {}).trustedTypes || {};
+
     // eslint-disable-next-line no-console
-    const report = ttOptions.report || console.warn.bind(console);
+    report = report || console.warn.bind(console);
+    csrfInputName = csrfInputName || 'csrfToken';
 
     let ast = null;
     let unpredictableSuffix = null;
@@ -328,6 +335,66 @@ module.exports = Object.freeze({
       check(root);
     }
 
+    // Add nonce attributes to attribute sets as needed.
+    function noncifyAttrs(element, getValue, attrs) {
+      if (nonceValueExpression) {
+        if (element === 'script' || element === 'style' ||
+            (element === 'link' && (getValue('rel') || '').toLowerCase() === 'stylesheet')) {
+          if (attrs.findIndex(({ name }) => name === 'nonce') < 0) {
+            attrs[attrs.length] = {
+              name: 'nonce',
+              val: nonceValueExpression,
+              mustEscape: true,
+            };
+          }
+        }
+      }
+    }
+
+    // Add nonce attributes to tags as needed.
+    function noncifyTag({ name, block: { nodes } }) {
+      if (name === 'form' && csrfInputValueExpression) {
+        nodes.unshift({
+          type: 'Conditional',
+          test: csrfInputValueExpression,
+          consequent: {
+            type: 'Block',
+            nodes: [
+              {
+                type: 'Tag',
+                name: 'input',
+                selfClosing: false,
+                block: {
+                  type: 'Block',
+                  nodes: [],
+                },
+                attrs: [
+                  {
+                    name: 'name',
+                    val: stringify(csrfInputName),
+                    mustEscape: true,
+                  },
+                  {
+                    name: 'type',
+                    val: '\'hidden\'',
+                    mustEscape: true,
+                  },
+                  {
+                    name: 'value',
+                    val: csrfInputValueExpression,
+                    mustEscape: true,
+                  },
+                ],
+                attributeBlocks: [],
+                isInline: false,
+              },
+            ],
+          },
+          alternate: null,
+        });
+      }
+    }
+
     // Keys match keys in the Pug AST.  The input is the referent of policyPath.
     const policy = {
       __proto__: null,
@@ -394,6 +461,7 @@ module.exports = Object.freeze({
           } else if (mixin) {
             deferred.push({ mixin, tag: obj });
           }
+          noncifyTag(obj);
         },
         Text(obj) {
           // Inline HTML is a token-level integrity risk.
@@ -434,6 +502,7 @@ module.exports = Object.freeze({
             }
           }
         }
+        noncifyAttrs(element, getValue, obj);
       },
       // "attributeBlocks" allow a single expression to specify a group of attributes.
       attributeBlocks(obj) {

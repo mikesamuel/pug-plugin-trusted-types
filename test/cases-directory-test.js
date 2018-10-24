@@ -80,6 +80,11 @@ function normalizeAst(pugAstString) {
       delete obj.line;
       delete obj.column;
       delete obj.filename;
+      if (obj.type === 'Code' && obj.buffer && obj.val === '\'\\n\'') {
+        // Skip line-breaks inserted to make HTML output easier to diff.
+        return void 0;
+      }
+      return obj;
     }
     return value;
   });
@@ -173,8 +178,17 @@ describe('case', () => {
               },
             };
 
+            let pugSource = fs.readFileSync(inputFile, 'utf-8');
+            let optionsFromSource = {};
+            pugSource = pugSource.replace(
+              /^- \/\/!options[ \t]+([^\n]+)/,
+              (whole, options) => {
+                optionsFromSource = JSON.parse(options);
+                return '';
+              });
+
             const fun = pug.compile(
-              fs.readFileSync(inputFile, 'utf-8'),
+              pugSource,
               {
                 filename: inputFile,
                 plugins: [ ttPlugin, interceptAst ],
@@ -184,6 +198,7 @@ describe('case', () => {
                     report(msg) {
                       consoleOutput += `${ msg }\n`;
                     },
+                    ...optionsFromSource,
                   },
                 },
               });
