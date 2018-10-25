@@ -1,6 +1,6 @@
 {
   "name": "pug-require",
-  "version": "1.0.11-alpha",
+  "version": "1.0.12-alpha",
   "description": "Load Pug templates via require()",
   "main": "index.js",
   "files": [
@@ -28,6 +28,6 @@
   "dependencies": {
     "module-keys": "^1.0.9",
     "pirates": "^4.0.0",
-    "pug-plugin-trusted-types": "^1.0.11-alpha"
+    "pug-plugin-trusted-types": "^1.0.12-alpha"
   }
 }
