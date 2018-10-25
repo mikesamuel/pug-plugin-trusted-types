@@ -194,12 +194,13 @@ describe('case', () => {
                 plugins: [ ttPlugin, interceptAst ],
                 basedir: __dirname,
                 filterOptions: {
-                  trustedTypes: {
-                    report(msg) {
-                      consoleOutput += `${ msg }\n`;
+                  trustedTypes: Object.assign(
+                    {
+                      report(msg) {
+                        consoleOutput += `${ msg }\n`;
+                      },
                     },
-                    ...optionsFromSource,
-                  },
+                    optionsFromSource),
                 },
               });
 
