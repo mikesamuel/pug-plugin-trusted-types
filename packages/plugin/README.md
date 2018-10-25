@@ -23,6 +23,7 @@ to reduce the risk of XSS.
 *  [Double checking expressions](#hdr-double-checking-expressions)
 *  [Automagic](#hdr-automagic)
    *  [CSRF (Cross-Site Request Forgery) Protection](#hdr-csrf-cross-site-request-forgery-protection)
+      *  [Configuring with csrf-crypto](#hdr-configuring-with-csrf-crypto)
    *  [Content-Security-Policy](#hdr-content-security-policy)
 *  [Plugin Configuration](#hdr-plugin-configuration)
    *  [csrfInputName](#hdr-csrfinputname)
@@ -243,6 +244,48 @@ will have a hidden input added:
   <input name="csrf" type="hidden" value="r4Nd0M_NuM83R"/>
   <button type="submit">Delete</button>
 </form>
+```
+
+#### Configuring with csrf-crypto       <a name="hdr-configuring-with-csrf-crypto"></a>
+
+If you use [*csrf-crypto*](https://npmjs.com/package/csrf-crypto)
+and you're plugging in via *pug-require*, then the pieces fit together like:
+
+```js
+// Configure pug-require to thread
+const pugRequire = require('pug-require');
+pugRequire.configurePug({
+  filterOptions: {
+    trustedTypes: {
+      csrfInputName: '_csrf',
+      // You could use 'res.getFormToken()' as the value expression
+      // if you pass res to Pug.
+      csrfInputValueExpression: 'csrfToken',
+    },
+  },
+});
+
+// Load a pug template after configuring pug-require
+const template = require('./path/to/template.pug');
+
+// Setup csrf-crypto to define res.getFormToken().
+const csrfCrypt = require('csrf-crypto');
+app.use(csrfCrypto({ key: applicationLevelSecret }));
+app.use(csrfCrypto.enforcer());
+
+// When rendering HTML output using pug, provide access to the form token.
+function handle(req, res) {
+  // ...
+  res.end(
+    template({
+      get csrfToken() {
+        // Lazily generate a form token.
+        delete this.csrfToken;
+        this.csrfToken = res.getFormToken();
+        return this.csrfToken;
+      },
+    }));
+}
 ```
 
 ### Content-Security-Policy             <a name="hdr-content-security-policy"></a>
