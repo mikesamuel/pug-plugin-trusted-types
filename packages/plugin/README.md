@@ -270,7 +270,7 @@ const template = require('./path/to/template.pug');
 
 // Setup csrf-crypto to define res.getFormToken().
 const csrfCrypt = require('csrf-crypto');
-app.use(csrfCrypto({ key: applicationLevelSecret }));
+app.use(csrfCrypto({ key: applicationLevelSecret, /* ... */ }));
 app.use(csrfCrypto.enforcer());
 
 // When rendering HTML output using pug, provide access to the form token.
