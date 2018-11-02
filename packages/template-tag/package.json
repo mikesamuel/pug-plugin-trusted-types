@@ -30,6 +30,6 @@
     "pug-plugin-trusted-types": "^1.0.12-alpha",
     "pug-runtime-trusted-types": "^1.0.12-alpha",
     "pug-scrubber-trusted-types": "^1.0.12-alpha",
-    "template-tag-common": "^4.0.4"
+    "template-tag-common": "^4.0.5"
   }
 }
