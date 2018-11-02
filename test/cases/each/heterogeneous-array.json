@@ -1,0 +1,14 @@
+{
+  "elements": [
+    1234,
+    "a<b && c>d",
+    {
+      "content": "a<b> && </b>c",
+      "minter": "TrustedHTML"
+    },
+    {
+      "content": "https://example.com?a=<b>&c=</b>#<script>alert(document.origin)</script>",
+      "minter": "TrustedResourceURL"
+    }
+  ]
+}
