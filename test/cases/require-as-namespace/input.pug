@@ -1,0 +1,3 @@
+//- Tests that fix for ../require-bypass doesn't prevent all uses of require.
+if require.resolve(src).startsWith(require.resolve(`${imagesDir}/README`).replace(/[^/\\]+$/, ''))
+  img(src=src)

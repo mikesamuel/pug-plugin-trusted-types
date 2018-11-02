@@ -49,6 +49,7 @@ function requireStub(id) {
       throw new Error(id);
   }
 }
+requireStub.resolve = require.resolve;
 requireStub.keys = makeModuleKeys();
 
 

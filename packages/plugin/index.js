@@ -296,6 +296,9 @@ module.exports = Object.freeze({
 
       let warnedPug = false;
       let warnedModule = false;
+      // Allows check to take into account the context in which a node appears.
+      // Flattened pairs of [ancestor, keyInAncestorToDescendent].
+      const jsAstPath = [];
 
       function check(jsAst) {
         if (jsAst && typeof jsAst === 'object' && jsAst.type === 'Identifier') {
@@ -306,25 +309,39 @@ module.exports = Object.freeze({
               warnedPug = true;
             }
           } else if (name === 'require' &&
-                     !(Object.hasOwnProperty.call(astNode, 'mayRequire') && astNode.mayRequire)) {
+                     // Allow trusted plugin code to require modules they need.
+                     !(Object.hasOwnProperty.call(astNode, 'mayRequire') && astNode.mayRequire) &&
+                     // Allow require.keys and require.resolve but not require(moduleId).
+                     !(jsAstPath.length && jsAstPath[jsAstPath.length - 2].type === 'MemberExpression' &&
+                       jsAstPath[jsAstPath.length - 1] === 'object')) {
+            // Defang expression.
+            astNode[exprKey] = 'null';
             // We trust trusted plugin code and PUG code to use the module's private key
             // but not template code.
             if (!warnedModule) {
               distrust(`Expression (${ expr }) may interfere with module internals ${ jsAst.name }`);
-              astNode[exprKey] = 'null';
               warnedModule = true;
             }
           }
         }
+        checkChildren(jsAst); // eslint-disable-line no-use-before-define
+      }
+
+      function checkChildren(jsAst) {
         if (!seen.has(jsAst)) {
           seen.add(jsAst);
+          const jsAstPathLength = jsAstPath.length;
+          jsAstPath[jsAstPathLength] = jsAst;
           for (const key in jsAst) {
             if (Object.hasOwnProperty.call(jsAst, key)) {
+              jsAstPath[jsAstPathLength + 1] = key;
               check(jsAst[key]);
             }
           }
+          jsAstPath.length = jsAstPathLength;
         }
       }
+
       let root = null;
       try {
         root = isExpression ? parseExpression(expr) : parse(expr);
@@ -472,6 +489,9 @@ module.exports = Object.freeze({
             }
           }
         },
+        Each(obj) {
+          checkCodeDoesNotInterfere(obj, 'val', true);
+        },
       },
       // "attrs"'s value maps HTML attribute names to AST nodes representing value expressions.
       attrs(obj) {
@@ -569,6 +589,9 @@ module.exports = Object.freeze({
             if (typeof policyMember === 'function') {
               policyMember(x);
             }
+          }
+          if (key === 'test' || key === 'expr') {
+            checkCodeDoesNotInterfere(x, key, true);
           }
           apply(x[key]);
         }

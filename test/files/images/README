@@ -1,0 +1,2 @@
+See test/cases/require-as-namespace which tests uses of require.resolve from within
+a compiled template and which depends on the files here, but not their content.
