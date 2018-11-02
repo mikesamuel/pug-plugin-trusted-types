@@ -36,9 +36,6 @@ to reduce the risk of XSS.
 This plugin focuses on checking URLs, to prevent, e.g. arbitrary strings from reaching `<script src>` or
 `javascript:` URLs from reaching `<a href>`.
 
-This plugin cannot, by itself, prevent XSS due to
-[intentionally unsafe features](https://pugjs.org/language/code.html#unescaped-buffered-code).
-
 Without this plugin, the below can lead to XSS.
 
 ```js
@@ -56,6 +53,9 @@ console.log(html);
 //! <a href="javascript:alert(document.domain)">Link</a>
 ```
 
+This plugin cannot, by itself, prevent XSS due to intentionally
+[unsafe][] features but when it finds a use of unsafe features, it
+warns on them and refuses to output [TrustedHTML][].
 
 ## Usage                                <a name="hdr-usage"></a>
 
@@ -398,7 +398,7 @@ Called if the plugin finds a problem with the template.
 
 By default, this is `console.warn`.
 
-
+[unsafe]: https://pugjs.org/language/code.html#unescaped-buffered-code
 [pug-compile-code-snippet]: https://github.com/pugjs/pug/blob/a1b046321416fc4ab297b43083ccda25ec8959e5/packages/pug/lib/index.js#L260-L262
 [attribute block]: https://pugjs.org/language/attributes.html#attributes
 [TrustedHTML]: https://www.npmjs.com/package/web-contract-types#hdr-class-trustedhtml
