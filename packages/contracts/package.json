@@ -1,6 +1,6 @@
 {
   "name": "pug-contracts-trusted-types",
-  "version": "1.0.12-alpha",
+  "version": "1.0.13-alpha",
   "description": "Security-relevant metadata about HTML elements and attributes",
   "main": "index.js",
   "files": [
