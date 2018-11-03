@@ -194,8 +194,7 @@ module.exports = Object.freeze({
                 const attrName = property.key.name || property.key.value;
                 const { code: valueExpression } = generate(property.value);
                 if (constantinople(valueExpression)) {
-                  const value = constantinople.toConstant(valueExpression);
-                  values.set(attrName, value);
+                  values.set(attrName, constantinople.toConstant(valueExpression));
                 }
               }
             }
@@ -203,10 +202,7 @@ module.exports = Object.freeze({
           // Find any known values among the (attr=expr, ...) style attributes.
           for (const attr of attrs) {
             if (constantinople(attr.val)) {
-              const value = constantinople.toConstant(attr.val);
-              if (value) {
-                values.set(attr.name, value);
-              }
+              values.set(attr.name, constantinople.toConstant(attr.val));
             }
           }
         }
@@ -507,6 +503,7 @@ module.exports = Object.freeze({
               const constant = constantinople.toConstant(attr.val);
               if (/"/.test(constant)) {
                 // TODO: upstream a fix to pug_attr so that pug_attr('name', 'val">', false).
+                // https://github.com/pugjs/pug/pull/3073
                 distrust(`Attribute value ${ constant } breaks attribute quoting`);
               }
             }
