@@ -28,6 +28,8 @@
   "dependencies": {
     "module-keys": "^1.0.9",
     "pirates": "^4.0.0",
-    "pug-plugin-trusted-types": "^1.0.13-alpha"
+    "pug-plugin-trusted-types": "^1.0.13-alpha",
+    "pug-runtime-trusted-types": "^1.0.13-alpha",
+    "pug-scrubber-trusted-types": "^1.0.13-alpha"
   }
 }
