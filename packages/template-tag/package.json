@@ -1,6 +1,6 @@
 {
   "name": "pug-template-tag",
-  "version": "1.0.14-alpha",
+  "version": "1.0.15",
   "description": "Declare safe Pug templates inline in JavaScript",
   "main": "index.js",
   "files": [
@@ -27,9 +27,9 @@
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/template-tag/README.md",
   "dependencies": {
     "module-keys": "^1.0.9",
-    "pug-plugin-trusted-types": "^1.0.14-alpha",
-    "pug-runtime-trusted-types": "^1.0.14-alpha",
-    "pug-scrubber-trusted-types": "^1.0.14-alpha",
+    "pug-plugin-trusted-types": "^1.0.15",
+    "pug-runtime-trusted-types": "^1.0.15",
+    "pug-scrubber-trusted-types": "^1.0.15",
     "template-tag-common": "^4.0.5"
   }
 }
