@@ -91,9 +91,9 @@ const MALFORMED_MARKUP = new RegExp(
   // and does not count a '>' that is inside quotes following an '='.
   String.raw`<\/?[a-zA-Z](?:[^>=]|=[\t\n\f\r ]*(?:"[^"]*"?|'[^']*'?)?)*$` +
   // Comments should not embed -- that is not part of their end delimiter.
-  String.raw`|<!--[\s\S]--(?:[^>]|$)` +
+  String.raw`|<!--[\s\S]*?--(?:[^>]|$)` +
   // Short comments are lexical corner cases.
-  String.raw`<!---?(?:>|$)` +
+  String.raw`|<!---?(?:>|$)` +
   // Unclosed pseudo comments.
   String.raw`|<(?:[?]|!(?!--))[^>]*$`);
 

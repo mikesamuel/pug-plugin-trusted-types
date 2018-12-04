@@ -1,0 +1,3 @@
+cases/broken-comments/input.pug:3: Malformed HTML markup <!-- Hi -- 
+cases/broken-comments/input.pug:7: Malformed HTML markup <!--->
+cases/broken-comments/input.pug:11: Malformed HTML markup <!-- Unclosed --

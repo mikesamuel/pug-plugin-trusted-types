@@ -1,0 +1,48 @@
+{
+  "type": "Block",
+  "nodes": [
+    {
+      "type": "Tag",
+      "name": "html",
+      "selfClosing": false,
+      "block": {
+        "type": "Block",
+        "nodes": [
+          {
+            "type": "Text",
+            "val": "<!-- Hi -- there -->",
+            "isHtml": true
+          },
+          {
+            "type": "Code",
+            "val": "1",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": true
+          },
+          {
+            "type": "Text",
+            "val": "<!--->",
+            "isHtml": true
+          },
+          {
+            "type": "Code",
+            "val": "2",
+            "buffer": true,
+            "mustEscape": true,
+            "isInline": true
+          },
+          {
+            "type": "Text",
+            "val": "<!-- Unclosed --",
+            "isHtml": true
+          }
+        ]
+      },
+      "attrs": [],
+      "attributeBlocks": [],
+      "isInline": false
+    }
+  ],
+  "declaredBlocks": {}
+}
