@@ -307,7 +307,7 @@ module.exports = Object.freeze({
           } else if (name === 'require' &&
                      // Allow trusted plugin code to require modules they need.
                      !(Object.hasOwnProperty.call(astNode, 'mayRequire') && astNode.mayRequire) &&
-                     // Allow require.keys and require.resolve but not require(moduleId).
+                     // Allow require.moduleKeys and require.resolve but not require(moduleId).
                      !(jsAstPath.length && jsAstPath[jsAstPath.length - 2].type === 'MemberExpression' &&
                        jsAstPath[jsAstPath.length - 1] === 'object')) {
             // Defang expression.
@@ -637,7 +637,7 @@ module.exports = Object.freeze({
       ast.nodes.push(
         {
           'type': 'Code',
-          'val': `pug_html = rt_${ unpredictableSuffix }.getMinter(require.keys)(pug_html)`,
+          'val': `pug_html = rt_${ unpredictableSuffix }.getMinter(require.moduleKeys)(pug_html)`,
           'buffer': false,
           'mustEscape': false,
           'isInline': false,
@@ -663,7 +663,10 @@ module.exports = Object.freeze({
         {
           'type': 'Code',
           // TODO: How does this affect client-side compilation?
-          'val': `var rt_${ unpredictableSuffix } = require('pug-runtime-trusted-types');`,
+          'val': (
+            'require(\'module-keys/cjs\').polyfill(module, require);\n' +
+            `var rt_${ unpredictableSuffix } = require('pug-runtime-trusted-types');`
+          ),
           'buffer': false,
           'mustEscape': false,
           'isInline': false,

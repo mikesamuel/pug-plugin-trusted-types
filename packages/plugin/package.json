@@ -30,6 +30,7 @@
   "dependencies": {
     "@babel/generator": "^7.0.0",
     "@babel/parser": "^7.1.0",
+    "constantinople": "^3.1.2",
     "js-stringify": "^1.0.2",
     "pug-contracts-trusted-types": "^1.0.15",
     "pug-guards-trusted-types": "^1.0.15"

@@ -36,11 +36,12 @@
   "dependencies": {
     "@babel/generator": "^7.0.0",
     "@babel/parser": "^7.1.0",
+    "constantinople": "^3.1.2",
     "js-stringify": "^1.0.2",
-    "module-keys": "^1.0.9",
+    "module-keys": "^2.0.0",
     "pirates": "^4.0.0",
-    "template-tag-common": "^4.0.5",
-    "web-contract-types": "^1.0.8"
+    "template-tag-common": "^5.0.0",
+    "web-contract-types": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

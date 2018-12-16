@@ -15,6 +15,7 @@ to reduce the risk of XSS.
 
 <!-- TOC -->
 *  [Usage](#hdr-usage)
+   *  [Webpack integration via pug-loader](#hdr-webpack-integration-via-pug-loader)
    *  [Requiring Templates](#hdr-requiring-templates)
    *  [Inline Templates](#hdr-inline-templates)
    *  [Pre-compiled or manually compiled Templates](#hdr-pre-compiled-or-manually-compiled-templates)
@@ -67,6 +68,52 @@ code loaded in a CommonJS module context.
 Pug compiles templates to JavaScript which it loads by
 [calling `new Function()`][pug-compile-code-snippet] so does not
 load in a module context.
+
+### Webpack integration via pug-loader   <a name="hdr-webpack-integration-via-pug-loader"></a>
+
+[Pug-loader][] makes it easy to compile templates when webpacking.
+
+You do need to configure pug-loader to use this plugin though.
+
+If you're using `pug-loader`, your webpack.config.js probably has
+something like:
+
+```js
+({
+  rules: [
+    {
+      test: /\.pug$/,
+      use: [
+        {
+          loader: path.resolve('node_modules/pug-loader/index.js'),
+          options: {/* ... */}
+        }
+      ]
+    },
+    // ...
+  ],
+})
+```
+
+You need to make sure that pug-loader's `options` includes:
+
+```js
+({
+  options: {
+    plugins: [
+      // Any other plugins you use
+      require('pug-plugin-trusted-types'),
+    ],
+    // Optionally, configure the plugin.  You probably won't need to do this.
+    filterOptions: {
+      trustedTypes: {
+        // See "Plugin Configuration" below.
+      },
+    },
+  },
+})
+```
+
 
 ### Requiring Templates                 <a name="hdr-requiring-templates"></a>
 
@@ -407,3 +454,4 @@ By default, this is `console.warn`.
 [TrustedURL]: https://www.npmjs.com/package/web-contract-types#hdr-class-trustedurl
 [TrustedURL.sanitize]: https://www.npmjs.com/package/web-contract-types#hdr-trustedurl-sanitize
 [strong]: https://en.wikipedia.org/wiki/Cryptographically_secure_pseudorandom_number_generator
+[Pug-loader]: https://npmjs.com/package/pug-loader

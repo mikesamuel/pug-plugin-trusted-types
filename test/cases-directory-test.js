@@ -30,27 +30,27 @@ const {
   TrustedURL,
 } = require('web-contract-types');
 
-const mintTrustedHTML = require.keys.unboxStrict(Mintable.minterFor(TrustedHTML));
-const mintTrustedResourceURL = require.keys.unboxStrict(Mintable.minterFor(TrustedResourceURL));
-const mintTrustedScript = require.keys.unboxStrict(Mintable.minterFor(TrustedScript));
-const mintTrustedURL = require.keys.unboxStrict(Mintable.minterFor(TrustedURL));
+const mintTrustedHTML = require.moduleKeys.unboxStrict(Mintable.minterFor(TrustedHTML));
+const mintTrustedResourceURL = require.moduleKeys.unboxStrict(Mintable.minterFor(TrustedResourceURL));
+const mintTrustedScript = require.moduleKeys.unboxStrict(Mintable.minterFor(TrustedScript));
+const mintTrustedURL = require.moduleKeys.unboxStrict(Mintable.minterFor(TrustedURL));
 
 
 function requireStub(id) {
   // TODO: use a require extension handler to allow loading compiled code
   // in a context with ambient, hookable require.
   switch (id) {
+    case 'module-keys/cjs':
     case 'pug-runtime-trusted-types':
     case 'pug-scrubber-trusted-types':
       // eslint-disable-next-line global-require
       return require(id);
-    // TODO: scrubbers
     default:
       throw new Error(id);
   }
 }
 requireStub.resolve = require.resolve;
-requireStub.keys = makeModuleKeys();
+requireStub.moduleKeys = makeModuleKeys();
 
 
 function compareFileTo(file, want, normalize, defaultText = null) {

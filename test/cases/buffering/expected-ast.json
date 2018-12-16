@@ -3,7 +3,7 @@
   "nodes": [
     {
       "type": "Code",
-      "val": "var rt_4012a5a880f9d9a0a27a9f99b8d895073935f71031f572209fb7b5f8285fa4cb = require('pug-runtime-trusted-types');",
+      "val": "require('module-keys/cjs').polyfill(module, require);\nvar rt_4012a5a880f9d9a0a27a9f99b8d895073935f71031f572209fb7b5f8285fa4cb = require('pug-runtime-trusted-types');",
       "buffer": false,
       "mustEscape": false,
       "isInline": false,
@@ -45,7 +45,7 @@
     },
     {
       "type": "Code",
-      "val": "pug_html = rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.getMinter(require.keys)(pug_html)",
+      "val": "pug_html = rt_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.getMinter(require.moduleKeys)(pug_html)",
       "buffer": false,
       "mustEscape": false,
       "isInline": false
