@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/mikesamuel/pug-plugin-trusted-types/blob/master/packages/require/README.md",
   "dependencies": {
-    "module-keys": "^2.0.0",
+    "module-keys": "^2.0.1",
     "pirates": "^4.0.0",
     "pug-plugin-trusted-types": "^2.0.0",
     "pug-runtime-trusted-types": "^2.0.0",

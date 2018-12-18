@@ -38,9 +38,9 @@
     "@babel/parser": "^7.1.0",
     "constantinople": "^3.1.2",
     "js-stringify": "^1.0.2",
-    "module-keys": "^2.0.0",
+    "module-keys": "^2.0.1",
     "pirates": "^4.0.0",
-    "template-tag-common": "^5.0.0",
+    "template-tag-common": "^5.0.1",
     "web-contract-types": "^2.0.0"
   },
   "devDependencies": {

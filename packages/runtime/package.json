@@ -7,7 +7,7 @@
     "index.js"
   ],
   "dependencies": {
-    "module-keys": "^2.0.0",
+    "module-keys": "^2.0.1",
     "web-contract-types": "^2.0.0"
   },
   "scripts": {
