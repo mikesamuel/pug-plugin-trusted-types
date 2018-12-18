@@ -75,42 +75,46 @@ load in a module context.
 
 You do need to configure pug-loader to use this plugin though.
 
-If you're using `pug-loader`, your webpack.config.js probably has
-something like:
+If you're using `pug-loader`, your webpack.config.js should probably have something like:
 
 ```js
 ({
   rules: [
+    // When loading Pug, run pug-loader.
     {
       test: /\.pug$/,
       use: [
         {
           loader: path.resolve('node_modules/pug-loader/index.js'),
-          options: {/* ... */}
-        }
-      ]
+          options: {
+            plugins: [
+              // Any other plugins you use should ideally go first.
+              require('pug-plugin-trusted-types'),
+            ],
+          },
+          // Optionally, configure the plugin.  You probably won't need to do this.
+          filterOptions: {
+            trustedTypes: {
+              // See "Plugin Configuration" below.
+            },
+          },
+        },
+      ],
     },
-    // ...
+    // This runs the module-keys babel processor on all JavaScript sources.
+    {
+      test: /\.js$/,
+      use: [
+        {
+          loader: path.resolve('node_modules/babel-loader/lib/index.js'),
+          options: {
+            plugins: ['module-keys/babel'],
+          },
+        },
+      ],
+      exclude: /node_modules\/(webpack\/buildin|module-keys|path-browserify|process)/,
+    },
   ],
-})
-```
-
-You need to make sure that pug-loader's `options` includes:
-
-```js
-({
-  options: {
-    plugins: [
-      // Any other plugins you use
-      require('pug-plugin-trusted-types'),
-    ],
-    // Optionally, configure the plugin.  You probably won't need to do this.
-    filterOptions: {
-      trustedTypes: {
-        // See "Plugin Configuration" below.
-      },
-    },
-  },
 })
 ```
 
