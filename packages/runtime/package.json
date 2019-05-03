@@ -1,6 +1,6 @@
 {
   "name": "pug-runtime-trusted-types",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Security-relevant metadata about HTML elements and attributes",
   "main": "index.js",
   "files": [
